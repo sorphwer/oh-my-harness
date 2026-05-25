@@ -1,0 +1,39 @@
+# Acme Notes — harness.yaml
+#
+# Authored against the schema in
+# .harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md
+#
+# This is the v0 reference input: it should compile to a byte-equal subset
+# of example/nextjs-acme/.harness/.
+
+preset: nextjs
+
+name: acme-notes
+displayName: Acme Notes
+overview: |
+  Acme Notes is a single-user Next.js notes app. Each signed-in user owns a
+  private collection of notes. Notes have a small lifecycle
+  (DRAFT → PUBLISHED → ARCHIVED) and can be shared by URL only after they
+  reach PUBLISHED.
+
+stack:
+  framework: nextjs-16
+  database: postgres-neon
+  orm: drizzle
+  auth: authjs-magic-link
+  validation: zod
+  deploy: vercel-fluid
+
+contract:
+  tenancy: single-user
+  publicIdFormat: "note_{ulid}"
+  lifecycleField: state
+  lifecycleValues: [DRAFT, PUBLISHED, ARCHIVED]
+  publicReadPath: "/n/{note_id}"
+
+references:
+  - auth-js-llms
+
+# No extras: the nextjs preset already brings the plugins, docs, and
+# permissions this project needs. Add `extras: { plugins, skills, agents,
+# hooks }` here when a project needs anything beyond the preset.

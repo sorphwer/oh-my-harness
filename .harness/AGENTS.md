@@ -54,11 +54,17 @@ Planned for compiler v0:
 - `tsx` for running TypeScript directly during development
 - `vitest` for fixture tests
 
-Planned content pools:
+Planned content directories:
 
-- `docs-pool/` - parameterized markdown fragments
-- `catalog/` - skill catalog entries
-- `references-pool/` - raw reference files copied into generated harnesses
+- `plugins/<id>/` - self-contained bundles. Each plugin can ship any combination of:
+  - `README.md` (required) - LLM- and human-readable description
+  - `skills/<name>.json` - aggregated into `SKILLS.md`
+  - `agents/<name>.md` - copied to `.claude/agents/<name>.md`
+  - `hooks/<name>.json` - merged into `.claude/settings.example.json`'s `hooks` block
+  - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
+  - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
+- `references-pool/` - shared raw LLM-readable reference files
+- `presets/<name>.ts` - named plugin id lists (post-v0; hardcoded in compiler for v0)
 
 ## Planning Document Convention
 
