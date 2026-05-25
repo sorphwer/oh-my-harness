@@ -102,44 +102,23 @@ To make v0 also exercise skills + references + permissions, the target must addi
 
 After this expansion, the round-trip test (with the subset rule below) proves docs + skills + references + permissions all work end-to-end.
 
-## Yaml Schema (v0)
+## Yaml Schema
 
-The minimum fields needed to reproduce the existing `example/nextjs-acme/.harness/`. Declared with zod in `src/compile.ts`:
+**Superseded by [`2026-05-25-harness-yaml-schema-design.md`](2026-05-25-harness-yaml-schema-design.md).**
 
-```ts
-const HarnessYaml = z.object({
-  name: z.string(),                       // slug, e.g. "acme-notes"
-  displayName: z.string(),                // "Acme Notes"
-  projectOverview: z.string(),            // free-form paragraph
+The yaml schema, resource model, and preset semantics are defined in that companion spec. Key changes from the original v0 sketch that used to live here:
 
-  stack: z.object({
-    framework: z.enum(["nextjs-16"]),     // open up later
-    database: z.enum(["postgres-neon"]),
-    orm: z.enum(["drizzle"]),
-    auth: z.enum(["authjs-magic-link"]),
-    validation: z.enum(["zod"]),
-    deploy: z.enum(["vercel-fluid"]),
-  }),
+- `preset: nextjs` becomes a required top-level field. It expands to a default set of plugins, docs, and a permissions preset.
+- `docs: []` is removed from yaml — the preset decides which docs render.
+- `skills: []` moves under `extras.skills` (default empty); top-level skills no longer exist.
+- New `extras: { plugins, skills, agents, hooks }` namespace covers everything beyond the preset.
+- `projectOverview` renamed to `overview`.
+- `references` stays at the top level (per-project, free-form) and accepts pool ids or filesystem paths.
+- `permissions: { preset }` block removed — permissions ride along with the preset.
 
-  contract: z.object({
-    tenancy: z.enum(["single-user", "single-tenant", "multi-tenant"]),
-    publicIdFormat: z.string(),           // e.g. "note_{ulid}"
-    lifecycleField: z.string(),           // e.g. "state"
-    lifecycleValues: z.array(z.string()), // e.g. ["DRAFT","PUBLISHED","ARCHIVED"]
-    publicReadPath: z.string().optional(),
-  }),
+Two new content pools (`agents-pool/`, `hooks-pool/`) are added; `presets/` and `permissions-pool/` may stay hardcoded in `src/compile.ts` until a second preset / permission set appears.
 
-  docs: z.array(z.string()).min(1),       // ids into docs-pool/
-  skills: z.array(z.string()),            // ids into catalog/
-  references: z.array(z.string()),        // ids into references-pool/
-
-  permissions: z.object({
-    preset: z.enum(["default-nextjs"]),   // only one preset for v0
-  }).optional(),
-});
-```
-
-The schema is intentionally narrow. Every enum opens up only when a second fixture needs the new value. v0 only has to cover acme.
+The rest of this MVP spec — pipeline phases, fragment shapes, test strategy, dependencies, acceptance criterion — is unaffected by the schema redesign.
 
 ## Per-Phase Contracts
 
