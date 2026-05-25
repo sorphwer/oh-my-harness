@@ -34,18 +34,18 @@ Two kinds of compile-time inputs:
 ```
 plugins/<plugin>/
   README.md                                # required
-  skills/<name>.json                       # optional, 0..N
+  skills/<name>/SKILL.md                   # optional, 0..N  (frontmatter `name` + `description`; body is the skill instructions)
   agents/<name>.md                         # optional, 0..N
   hooks/<name>.json                        # optional, 0..N
   docs/<name>/{manifest.ts, template.md}   # optional, 0..N
   permissions.json                         # optional, 0..1
 ```
 
-Every subdirectory and every file is optional except `README.md`. The shape of a plugin is determined by which subdirs/files exist. Examples:
+Every subdirectory and every file is optional except `README.md`. The shape of a plugin is determined by which subdirs/files exist. Examples (on disk today):
 
-- **Pure-skill plugin** (`plugins/superpowers/`): only `README.md` and `skills/*.json`.
-- **Single-skill plugin** (`plugins/code-review/`): `README.md` + one `skills/code-review.json`.
-- **Stack plugin** (`plugins/nextjs/`): `README.md` + `docs/*` + `permissions.json`.
+- **Multi-skill plugin** (`plugins/planning/`): `README.md` + `skills/{brainstorming,spec-first-planning,test-driven-development}/SKILL.md`.
+- **Single-skill plugin** (`plugins/debugging/`): `README.md` + one `skills/systematic-debugging/SKILL.md`.
+- **Stack plugin** (planned `plugins/nextjs/`): `README.md` + `docs/*` + `permissions.json`.
 - **Full plugin** (hypothetical): `README.md` + everything.
 
 ### Plugin contribution → output mapping
@@ -53,7 +53,7 @@ Every subdirectory and every file is optional except `README.md`. The shape of a
 | Source inside a plugin | Output destination |
 |---|---|
 | `README.md` | not emitted (consumed by the LLM frontend and humans only) |
-| `skills/<name>.json` | aggregated across all enabled plugins into `<outDir>/SKILLS.md` |
+| `skills/<name>/SKILL.md` | aggregated across all enabled plugins into `<outDir>/SKILLS.md` (frontmatter supplies name + description; body is the skill instructions) |
 | `agents/<name>.md` | copied to `<outDir>/.claude/agents/<name>.md` |
 | `hooks/<name>.json` | merged across all enabled plugins into `<outDir>/.claude/settings.example.json`'s `hooks` block |
 | `docs/<name>/{manifest.ts, template.md}` | eta-rendered with yaml params, written to `<outDir>/<manifest.outputPath>` |
@@ -159,7 +159,7 @@ extras:                       # optional: anything beyond what the preset alread
 
 When no extras are needed, the entire `extras:` block is omitted.
 
-Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/{skills|agents|hooks}/<name>.{json|md}`. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
+Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/skills/<name>/SKILL.md`, `plugins/<plugin>/agents/<name>.md`, or `plugins/<plugin>/hooks/<name>.json` respectively. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
 
 ## Zod Schema (v1)
 
@@ -241,7 +241,7 @@ Output map:
 | Source | Destination |
 |--------|-------------|
 | `plugins/<plugin>/docs/<name>/template.md` (rendered) | `<outDir>/<manifest.outputPath>` |
-| aggregated `plugins/<plugin>/skills/*.json` | `<outDir>/SKILLS.md` |
+| aggregated `plugins/<plugin>/skills/*/SKILL.md` | `<outDir>/SKILLS.md` |
 | `plugins/<plugin>/agents/<name>.md` | `<outDir>/.claude/agents/<name>.md` |
 | merged plugin permissions + plugin id list + merged hooks | `<outDir>/.claude/settings.example.json` |
 | `references-pool/<id>.<ext>` or user path | `<outDir>/docs/references/<basename>` |
@@ -250,17 +250,43 @@ Output map:
 
 ```
 plugins/
-  superpowers/
+  planning/                 # multi-skill — intent capture, specs, plans, TDD
     README.md
     skills/
-      writing-plans.json
-      test-driven-development.json
-      executing-plans.json
-  code-review/
+      brainstorming/SKILL.md
+      spec-first-planning/SKILL.md
+      test-driven-development/SKILL.md
+  debugging/                # single-skill — root-cause investigation
     README.md
     skills/
-      code-review.json
-  nextjs/
+      systematic-debugging/SKILL.md
+  frontend/                 # multi-skill — frontend impl / polish / a11y
+    README.md
+    skills/
+      frontend-implementation/SKILL.md
+      frontend-polish/SKILL.md
+      accessibility-audit/SKILL.md
+  backend/                  # multi-skill — API design / changes / data integrity
+    README.md
+    skills/
+      api-design/SKILL.md
+      backend-change/SKILL.md
+      data-integrity/SKILL.md
+  delivery/                 # multi-skill — review (give/request/receive) / verify / finish
+    README.md
+    skills/
+      code-review/SKILL.md
+      requesting-code-review/SKILL.md
+      receiving-code-review/SKILL.md
+      verification-before-completion/SKILL.md
+      finishing-branch/SKILL.md
+  security-review/          # multi-skill — threat model / scan / fix
+    README.md
+    skills/
+      threat-model/SKILL.md
+      security-scan/SKILL.md
+      fix-security-finding/SKILL.md
+  nextjs/                   # PLANNED stack plugin (created during v1 implementation)
     README.md
     docs/
       agent-guide/{manifest.ts, template.md}
@@ -269,31 +295,37 @@ plugins/
       product-sense/{manifest.ts, template.md}
     permissions.json
 
-presets/                  # post-v0; for v0 hardcoded in src/compile.ts
+presets/                    # post-v0; for v0 hardcoded in src/compile.ts
   nextjs.ts
 
 references-pool/
   auth-js-llms.txt
 
-example/
+harness-kit-example/
   nextjs-acme/
     harness.yaml
-    .harness/             # compiled output (round-trip test target)
+    .harness/               # compiled output (round-trip test target)
 ```
 
-For v0, only `plugins/` and `references-pool/` need to physically exist as content directories; `presets/` stays hardcoded in `src/compile.ts` until a second preset appears.
+For v0, only `plugins/` and `references-pool/` need to physically exist as content directories; `presets/` stays hardcoded in `src/compile.ts` until a second preset appears. The six skill-plugins (`planning`…`security-review`) and `references-pool/` exist today; the `nextjs` stack plugin is built during v1 implementation.
 
 ## Migration From the Pre-Redesign Layout
 
 The pre-redesign layout had `catalog/`, `agents-pool/`, `hooks-pool/`, `docs-pool/`, and `permissions-pool/` as five top-level pool directories. The new layout collapses all five into `plugins/<plugin>/`. Concretely:
 
-- `catalog/<plugin>/<skill>.json` → `plugins/<plugin>/skills/<skill>.json`
-- `catalog/<skill>.json` (built-in) → `plugins/<skill>/{README.md, skills/<skill>.json}` (turn each built-in into a single-skill plugin)
+- `catalog/<plugin>/<skill>.json` → `plugins/<plugin>/skills/<skill>/SKILL.md`
+- `catalog/<skill>.json` (built-in) → `plugins/<skill>/{README.md, skills/<skill>/SKILL.md}` (turn each built-in into a single-skill plugin)
 - `agents-pool/<name>.md` → `plugins/<some-plugin>/agents/<name>.md`
 - `hooks-pool/<name>.json` → `plugins/<some-plugin>/hooks/<name>.json`
 - `docs-pool/<name>/...` → `plugins/<stack-plugin>/docs/<name>/...`
 - `permissions-pool/<name>.ts` → `plugins/<plugin>/permissions.json`
 - Preset shape `{ plugins, docs, permissions }` → `string[]` (plugin ids only).
+
+The intermediate `skills-pool/<category>/<skill>/SKILL.md` + empty `agent-pool/` layout (the in-flight reshuffle before this spec landed) migrated as:
+
+- `skills-pool/<category>/<skill>/SKILL.md` → `plugins/<category>/skills/<skill>/SKILL.md`
+- `skills-pool/README.md` (per-category bullets) → one `plugins/<category>/README.md` per plugin
+- `agent-pool/` (was empty) → removed; agents live inside whichever plugin ships them
 
 yaml shape itself is unchanged from the previous draft (still `preset` + `name/displayName/overview` + `stack` + `contract` + `references` + optional `extras`). Only the on-disk content layout changed.
 

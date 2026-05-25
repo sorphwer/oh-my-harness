@@ -83,13 +83,13 @@ The single unit of reusable content. A plugin is a directory under `plugins/<id>
 | Sub-path | Optional? | What it contributes |
 |---|---|---|
 | `README.md` | required | description consumed by humans and the LLM frontend; not emitted |
-| `skills/<name>.json` | optional, 0..N | one entry in the rendered `SKILLS.md` |
+| `skills/<name>/SKILL.md` | optional, 0..N | one entry in the rendered `SKILLS.md` (frontmatter `name` + `description` + body) |
 | `agents/<name>.md` | optional, 0..N | one file at `.harness/.claude/agents/<name>.md` |
 | `hooks/<name>.json` | optional, 0..N | one entry merged into `.harness/.claude/settings.example.json`'s `hooks` block |
 | `docs/<name>/{manifest.ts, template.md}` | optional, 0..N | one rendered file at the path the manifest declares |
 | `permissions.json` | optional, 0..1 | merged into the `permissions` block of `.harness/.claude/settings.example.json` |
 
-A plugin can be pure-skill (`plugins/superpowers/`: only `skills/`), single-skill (`plugins/code-review/`: one `skills/<name>.json`), pure-doc + permissions ("stack plugin" — `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks}` using `<plugin>:<name>` ids without enabling the whole plugin.
+A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks}` using `<plugin>:<name>` ids without enabling the whole plugin.
 
 ### Reference File
 

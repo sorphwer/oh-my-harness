@@ -1,5 +1,7 @@
 # harness-kit MVP v1 Implementation Plan
 
+> **NEEDS REWRITE (2026-05-25 reorg).** This plan was authored before the `skills-pool/` → `plugins/<category>/skills/<name>/SKILL.md` reorganization. It still assumes (a) plugin ids `superpowers` / `code-review` (now `planning` / `delivery` etc. on disk), (b) skill source format `skills/<name>.json` (now nested `skills/<name>/SKILL.md` with frontmatter), and (c) a `CatalogEntry` JSON schema. Do NOT execute this plan as-written — it will create a parallel, divergent plugin tree. Re-run `writing-plans` against the current spec (`../specs/2026-05-25-harness-yaml-schema-design.md`) to produce a v2 plan that targets the on-disk layout.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a minimal TypeScript script (`src/compile.ts`) that reads `harness-kit-example/nextjs-acme/harness.yaml` (new schema: `preset: nextjs` + `extras`) and writes `harness-kit-example/nextjs-acme/.harness/` byte-identical to a hand-curated target. All reusable content lives under `plugins/<id>/`; the preset expands to a plugin id list.

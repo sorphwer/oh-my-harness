@@ -54,15 +54,17 @@ Planned for compiler v0:
 - `tsx` for running TypeScript directly during development
 - `vitest` for fixture tests
 
-Planned content directories:
+Content directories (current):
 
 - `plugins/<id>/` - self-contained bundles. Each plugin can ship any combination of:
   - `README.md` (required) - LLM- and human-readable description
-  - `skills/<name>.json` - aggregated into `SKILLS.md`
+  - `skills/<name>/SKILL.md` - frontmatter (`name`, `description`) + body; aggregated into `SKILLS.md`
   - `agents/<name>.md` - copied to `.claude/agents/<name>.md`
   - `hooks/<name>.json` - merged into `.claude/settings.example.json`'s `hooks` block
   - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
   - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
+
+  On disk today: `planning`, `debugging`, `frontend`, `backend`, `delivery`, `security-review` (each a skills-only plugin migrated from the previous `skills-pool/`). The `nextjs` stack plugin (docs + permissions) is added during v1 compiler implementation.
 - `references-pool/` - shared raw LLM-readable reference files
 - `presets/<name>.ts` - named plugin id lists (post-v0; hardcoded in compiler for v0)
 
