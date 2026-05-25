@@ -1,0 +1,70 @@
+# Vercel Deployment Reference — Discord Human Approval Desk
+# This file is intended as context for LLMs assisting with deployment.
+
+## Overview
+
+This project deploys to Vercel as a serverless Next.js application.
+Vercel is chosen for: zero-config Next.js support, automatic HTTPS, global CDN, serverless functions.
+
+## Deployment Setup
+
+1. Link repository to Vercel project
+2. Framework preset: Next.js (auto-detected)
+3. Build command: next build (default)
+4. Output directory: .next (default)
+5. Install command: npm install (default)
+
+## Environment Variables (Vercel Dashboard)
+
+All must be set in Vercel project settings → Environment Variables:
+
+| Variable                  | Scope      | Notes                                    |
+|---------------------------|------------|------------------------------------------|
+| SUPABASE_URL              | All        | Supabase project URL                     |
+| SUPABASE_ANON_KEY         | All        | Safe for client-side                     |
+| SUPABASE_SERVICE_ROLE_KEY | Server     | NEVER expose to client                   |
+| ENCRYPTION_KEY            | Server     | AES-256-GCM key for downstream and Discord bot secrets |
+
+Discord application ID, public key, channel ID, and bot token are stored per workflow.
+Only the encryption key remains a server environment variable.
+
+## Serverless Function Considerations
+
+- API routes become serverless functions (cold start possible)
+- Default timeout: 10s (Hobby), 60s (Pro) — sufficient for most operations
+- Discord interactions must respond within 3s → use type 6 (DEFERRED_UPDATE_MESSAGE) for approve, type 7 (UPDATE_MESSAGE) for reject
+- No persistent connections or background workers
+- Each function invocation is stateless
+
+## Production URL
+
+- The production URL is needed EARLY (Phase 2) for Discord Interactions Endpoint
+- Discord requires HTTPS endpoint for interactions webhook
+- Vercel provides automatic HTTPS on all deployments
+- Set the Vercel production URL as Discord "Interactions Endpoint URL"
+
+## Deployment Workflow
+
+1. Push to main branch → automatic production deployment
+2. Push to other branches → preview deployments
+3. Preview URLs are NOT suitable for Discord interactions (they change)
+4. Only production URL should be registered with Discord
+
+## Important Notes
+
+- Supabase Auth callback URL must include production domain
+- CORS is not needed for Discord interactions (server-to-server POST)
+- Static assets served from Vercel CDN
+- Server Components render at request time (no ISR needed for this app)
+- API routes are Edge-compatible but we use Node.js runtime for crypto operations
+
+## Build Requirements
+
+- Node.js 18+ (Vercel default)
+- npm (package manager)
+- TypeScript compilation handled by Next.js
+
+## Monitoring
+
+- Vercel dashboard provides: function logs, deployment status, error tracking
+- Future: integrate with external monitoring for production alerting

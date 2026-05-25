@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(npx vitest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:nextjs.org)",
+      "WebFetch(domain:vercel.com)"
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+# Design System Reference — Discord Human Approval Desk
+# This file is intended as context for LLMs assisting with UI development.
+
+## Color Palette
+
+### Background
+- --bg-primary: #1a1a2e        (page background)
+- --bg-card: #16213e           (card/panel background)
+- --bg-input: #0f3460          (input field background)
+
+### Borders
+- --border: #1a1a4e            (subtle borders)
+
+### Text
+- --text-primary: #e4e4e7      (primary text)
+- --text-secondary: #a1a1aa    (secondary/muted text)
+
+### Semantic Colors
+- --accent: #5865f2            (Discord blurple — primary actions, links)
+- --success: #57f287           (approved status, success states)
+- --danger: #ed4245            (rejected status, destructive actions)
+- --warning: #fee75c           (pending status, warnings)
+- --info: #5865f2              (redo status, informational)
+
+## Typography
+
+- Font stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif
+- No custom fonts loaded
+- Base font size: 16px (1rem)
+- Heading scale: h1=2rem, h2=1.5rem, h3=1.25rem
+
+## Spacing & Layout
+
+- Card border-radius: 8px
+- Input border-radius: 6px
+- Button border-radius: 6px
+- Card padding: 1.5rem
+- Page max-width: 1200px (centered)
+- Grid: responsive card grid, min 300px per card
+
+## Components
+
+### Button
+- Primary: bg --accent, text white, hover slightly lighter
+- Danger: bg --danger, text white
+- Ghost: transparent bg, text --text-secondary, hover bg --bg-input
+- Disabled: opacity 0.5, cursor not-allowed
+
+### Card
+- Background: --bg-card
+- Border: 1px solid --border
+- Border-radius: 8px
+- Padding: 1.5rem
+
+### Input / Textarea
+- Background: --bg-input
+- Border: 1px solid --border
+- Border-radius: 6px
+- Text: --text-primary
+- Placeholder: --text-secondary
+- Focus: border-color --accent
+
+### Badge (Status)
+- pending: background #fee75c20, text #fee75c, border #fee75c40
+- approved: background #57f28720, text #57f287, border #57f28740
+- rejected: background #ed424520, text #ed4245, border #ed424540
+- redo: background #5865f220, text #5865f2, border #5865f240
+- timed_out: background #a1a1aa20, text #a1a1aa, border #a1a1aa40
+
+### Select
+- Same styling as Input
+- Custom dropdown arrow
+
+## Patterns
+
+### Dark Theme
+- All backgrounds are dark (navy-black range)
+- Text is light (near-white to gray)
+- Accent color is Discord blurple
+- No heavy box-shadows; use subtle borders instead
+- Cards sit on slightly different bg shade for depth
+
+### Form Layout
+- Single-column layout
+- Sections separated by horizontal rules or section headers
+- Labels above inputs
+- Error text in --danger color below inputs
+- Submit button right-aligned or full-width
+
+### Dashboard Layout
+- Top bar with app name and user menu
+- Card grid for approval workflows
+- Each card shows: name, slug, state counts
+- "Create New" card or button
+
+### Responsive
+- Desktop: card grid
+- Mobile: single column stack
+- Minimum touch target: 44px
+
+## Discord-Inspired Elements
+
+- Blurple (#5865f2) as primary accent matches Discord branding
+- Rounded UI elements similar to Discord's interface
+- Dark theme aligns with Discord's default appearance
+- Status badge colors match Discord embed sidebar colors
+
+## Accessibility
+
+- Color contrast ratios meet WCAG AA for text
+- Interactive elements have visible focus indicators
+- Form inputs have associated labels
+- Status information conveyed via text + color (not color alone)

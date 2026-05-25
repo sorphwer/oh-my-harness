@@ -1,0 +1,76 @@
+# Supabase Auth Reference — Discord Human Approval Desk
+# This file is intended as context for LLMs assisting with auth implementation.
+
+## Overview
+
+This project uses Supabase Auth for frontend authentication (admin management console).
+Supabase Auth provides email/password authentication via @supabase/ssr for Next.js App Router.
+
+## Client Setup
+
+### Browser Client (src/lib/supabase/client.ts)
+- Uses createBrowserClient from @supabase/ssr
+- Initialized with SUPABASE_URL and SUPABASE_ANON_KEY
+- Used in client components for auth state
+
+### Server Client (src/lib/supabase/server.ts)
+- Uses createServerClient from @supabase/ssr
+- Reads/writes cookies via Next.js cookies() API
+- Used in Server Components and Route Handlers
+- For admin operations: use SUPABASE_SERVICE_ROLE_KEY (bypasses RLS)
+
+### Middleware (src/middleware.ts)
+- Intercepts requests to protected routes
+- Refreshes session using createServerClient
+- Redirects unauthenticated users to /login
+- Protected routes: / (dashboard), /approval-workflows/*, /logs
+
+## Auth Flow
+
+1. User navigates to protected route
+2. Middleware checks for valid session
+3. If no session → redirect to /login
+4. User enters email + password
+5. supabase.auth.signInWithPassword() or supabase.auth.signUp()
+6. On success → redirect to dashboard
+7. Session persisted via cookies (SSR-compatible)
+
+## Key APIs
+
+### Sign Up
+```typescript
+const { data, error } = await supabase.auth.signUp({
+  email: 'user@example.com',
+  password: 'password123',
+})
+```
+
+### Sign In
+```typescript
+const { data, error } = await supabase.auth.signInWithPassword({
+  email: 'user@example.com',
+  password: 'password123',
+})
+```
+
+### Sign Out
+```typescript
+const { error } = await supabase.auth.signOut()
+```
+
+### Get Session (Server)
+```typescript
+const { data: { session } } = await supabase.auth.getSession()
+```
+
+## Important Notes
+
+- SUPABASE_ANON_KEY is safe for client-side (public key)
+- SUPABASE_SERVICE_ROLE_KEY must NEVER be exposed to the client
+- Auth callback URL must be configured in Supabase dashboard for production domain
+- Supabase Auth is used ONLY for the management console; Agent API uses x-api-key
+- No role-based access in V1 — any authenticated user has full management access
+
+## Packages
+- @supabase/supabase-js: Core Supabase client
+- @supabase/ssr: SSR helpers for Next.js (cookie-based session)
