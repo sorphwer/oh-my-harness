@@ -1,5 +1,7 @@
 # harness-kit MVP v0 Implementation Plan
 
+> **SUPERSEDED — DO NOT EXECUTE AS-IS.** This plan was written against the pre-redesign yaml schema (top-level `docs[] / skills[] / permissions{preset}`). The new schema (`preset: nextjs` + `extras: { plugins, skills, agents, hooks }`, with `agents-pool/` and `hooks-pool/` added) is defined in [`../specs/2026-05-25-harness-yaml-schema-design.md`](../specs/2026-05-25-harness-yaml-schema-design.md). A fresh implementation plan against the new schema is pending (will be produced via `superpowers:writing-plans`). This file is retained as historical reference for the architecture / pipeline / test-strategy decisions that still hold; the task-by-task instructions (especially the yaml example in Task 2 and the zod schema in Task 11) are stale and should not be followed literally.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a minimal TypeScript script (`src/compile.ts`) that reads `example/nextjs-acme/harness.yaml` and writes `example/nextjs-acme/.harness/` byte-identical to a hand-curated target, exercising all three content pools (docs / skills / references).
