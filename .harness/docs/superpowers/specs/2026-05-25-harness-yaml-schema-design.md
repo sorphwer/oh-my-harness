@@ -304,7 +304,7 @@ yaml shape itself is unchanged from the previous draft (still `preset` + `name/d
 3. `.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v1.md` — rewrite against the plugin-centric layout (replace catalog/ and agents-pool/hooks-pool tasks with plugin-creation tasks; adjust all paths in resolve()/render() code).
 4. `.harness/ARCHITECTURE.md` — collapse separate entity definitions (Skill / Agent / Hook / Docs / Permissions / Plugin) into a single Plugin entity that ships sub-resources; reflect the new pool list in the high-level diagram.
 5. `.harness/AGENTS.md` — replace the planned content-pools list with `plugins/`, `presets/`, `references-pool/`.
-6. `example/nextjs-acme/harness.yaml` — no change needed (yaml shape unchanged).
+6. `harness-kit-example/nextjs-acme/harness.yaml` — no change needed (yaml shape unchanged).
 7. `CLAUDE.md`, root `AGENTS.md` — no change needed (entry-point files; nothing references pool structure).
 
 ## Non-Goals (v1 of the schema)

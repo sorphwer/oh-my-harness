@@ -6,7 +6,7 @@ Scope: minimal `yaml → .harness/` compiler. No CLI, no watch, no check mode.
 
 ## Goal
 
-Prove the three-layer architecture from `CLAUDE.md` end-to-end with the smallest possible code surface: a TypeScript script that reads `example/nextjs-acme/harness.yaml` and produces a tree that is byte-equal to the corresponding subset of `example/nextjs-acme/.harness/` (the "subset rule" — see Test Strategy below). The hand-curated target also contains demo docs that v0 doesn't compile yet; those are allowed and ignored by the test.
+Prove the three-layer architecture from `CLAUDE.md` end-to-end with the smallest possible code surface: a TypeScript script that reads `harness-kit-example/nextjs-acme/harness.yaml` and produces a tree that is byte-equal to the corresponding subset of `harness-kit-example/nextjs-acme/.harness/` (the "subset rule" — see Test Strategy below). The hand-curated target also contains demo docs that v0 doesn't compile yet; those are allowed and ignored by the test.
 
 If this works, every subsequent feature (CLI, `--watch`, `--check`, second fixture, self-host, LLM frontend) is a thin wrapper or extra phase added later.
 
@@ -92,7 +92,7 @@ The pools above hold the **minimum entries needed for v0 acme** — 4 docs, 4 sk
 
 ### Expanding the acme target
 
-The hand-written `example/nextjs-acme/.harness/` contains 11 doc files (`AGENTS.md`, `ARCHITECTURE.md`, and 9 under `docs/`) so that the demo reads as a complete worked example. v0's compiler only produces 4 of those (`AGENTS.md`, `ARCHITECTURE.md`, `docs/PLANS.md`, `docs/PRODUCT_SENSE.md`); the other 7 are demo-only.
+The hand-written `harness-kit-example/nextjs-acme/.harness/` contains 11 doc files (`AGENTS.md`, `ARCHITECTURE.md`, and 9 under `docs/`) so that the demo reads as a complete worked example. v0's compiler only produces 4 of those (`AGENTS.md`, `ARCHITECTURE.md`, `docs/PLANS.md`, `docs/PRODUCT_SENSE.md`); the other 7 are demo-only.
 
 To make v0 also exercise skills + references + permissions, the target must additionally include:
 
@@ -232,10 +232,10 @@ import { assertActualSubsetOfExpected } from "./helpers";
 test("nextjs-acme: compiled tree is a byte-equal subset of the target", async () => {
   const tmp = mkdtempSync(join(tmpdir(), "harness-kit-"));
   await compile(
-    "example/nextjs-acme/harness.yaml",
+    "harness-kit-example/nextjs-acme/harness.yaml",
     tmp,
   );
-  assertActualSubsetOfExpected(tmp, "example/nextjs-acme/.harness");
+  assertActualSubsetOfExpected(tmp, "harness-kit-example/nextjs-acme/.harness");
 });
 ```
 
@@ -291,9 +291,9 @@ Checkpoint order — not strict serial, since later iteration loops back into ea
 2. `src/compile.ts` skeleton: typed `compile(yamlPath, outDir)` with empty `load`, `resolve`, `render`, `emit` stubs called in order.
 3. Catalog entries (4 JSON files) for the skills acme uses.
 4. References (`auth-js-llms.txt`) copied into `references-pool/` from a public source (or hand-written stub).
-5. Expand the acme target: add `SKILLS.md`, `docs/references/auth-js-llms.txt`, and `.claude/settings.example.json` to `example/nextjs-acme/.harness/`. Initial content is the writer's best guess at what the compiler will emit; refined in step 10.
-6. Docs-pool fragments (4 dirs: `agent-guide`, `architecture`, `planning-conventions`, `product-sense`), each with `manifest.ts` + `template.md`. Source the template content by examining the corresponding file in `example/nextjs-acme/.harness/` and parameterizing the bits that vary.
-7. `example/nextjs-acme/harness.yaml` — write the yaml that, plus the pools above, should produce the (expanded) target folder.
+5. Expand the acme target: add `SKILLS.md`, `docs/references/auth-js-llms.txt`, and `.claude/settings.example.json` to `harness-kit-example/nextjs-acme/.harness/`. Initial content is the writer's best guess at what the compiler will emit; refined in step 10.
+6. Docs-pool fragments (4 dirs: `agent-guide`, `architecture`, `planning-conventions`, `product-sense`), each with `manifest.ts` + `template.md`. Source the template content by examining the corresponding file in `harness-kit-example/nextjs-acme/.harness/` and parameterizing the bits that vary.
+7. `harness-kit-example/nextjs-acme/harness.yaml` — write the yaml that, plus the pools above, should produce the (expanded) target folder.
 8. Implement `load`, then `resolve`, then `render`, then `emit`.
 9. `test/fixtures.test.ts` + `assertDirsEqual` helper.
 10. Iterate: run the test, diff the output against the target, fix templates / params / pipeline / target until byte-equal.

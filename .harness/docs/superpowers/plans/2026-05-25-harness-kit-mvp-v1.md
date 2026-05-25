@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a minimal TypeScript script (`src/compile.ts`) that reads `example/nextjs-acme/harness.yaml` (new schema: `preset: nextjs` + `extras`) and writes `example/nextjs-acme/.harness/` byte-identical to a hand-curated target. All reusable content lives under `plugins/<id>/`; the preset expands to a plugin id list.
+**Goal:** Build a minimal TypeScript script (`src/compile.ts`) that reads `harness-kit-example/nextjs-acme/harness.yaml` (new schema: `preset: nextjs` + `extras`) and writes `harness-kit-example/nextjs-acme/.harness/` byte-identical to a hand-curated target. All reusable content lives under `plugins/<id>/`; the preset expands to a plugin id list.
 
 **Architecture:** Four pipeline phases as plain functions in one file — `load` (yaml→typed object) → `resolve` (preset → plugin ids → walk `plugins/<id>/{skills,agents,hooks,docs,permissions.json}`) → `render` (fragments→file content map) → `emit` (map→disk). No CLI, no watch, no check mode. One integration test asserts byte equality between compiled output and hand-curated target using the subset rule.
 
@@ -19,11 +19,11 @@
 Files this plan creates or modifies:
 
 **Existing (must not regress):**
-- `example/nextjs-acme/harness.yaml` — new-schema yaml, already authored
-- `example/nextjs-acme/.harness/AGENTS.md`
-- `example/nextjs-acme/.harness/ARCHITECTURE.md`
-- `example/nextjs-acme/.harness/docs/PLANS.md`
-- `example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md`
+- `harness-kit-example/nextjs-acme/harness.yaml` — new-schema yaml, already authored
+- `harness-kit-example/nextjs-acme/.harness/AGENTS.md`
+- `harness-kit-example/nextjs-acme/.harness/ARCHITECTURE.md`
+- `harness-kit-example/nextjs-acme/.harness/docs/PLANS.md`
+- `harness-kit-example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md`
 
 **New:**
 - `package.json`, `tsconfig.json`, `.gitignore`
@@ -42,9 +42,9 @@ Files this plan creates or modifies:
 - `plugins/nextjs/docs/planning-conventions/{manifest.ts, template.md}`
 - `plugins/nextjs/docs/product-sense/{manifest.ts, template.md}`
 - `references-pool/auth-js-llms.txt`
-- `example/nextjs-acme/.harness/SKILLS.md` — hand-curated target
-- `example/nextjs-acme/.harness/docs/references/auth-js-llms.txt` — hand-curated target
-- `example/nextjs-acme/.harness/.claude/settings.example.json` — hand-curated target (permissions + plugin list)
+- `harness-kit-example/nextjs-acme/.harness/SKILLS.md` — hand-curated target
+- `harness-kit-example/nextjs-acme/.harness/docs/references/auth-js-llms.txt` — hand-curated target
+- `harness-kit-example/nextjs-acme/.harness/.claude/settings.example.json` — hand-curated target (permissions + plugin list)
 
 ### What v0 exercises
 
@@ -229,10 +229,10 @@ const repoRoot = resolve(__dirname, "..");
 test("nextjs-acme: compiled tree is a byte-equal subset of the target", async () => {
   const tmp = mkdtempSync(join(tmpdir(), "harness-kit-"));
   await compile(
-    join(repoRoot, "example/nextjs-acme/harness.yaml"),
+    join(repoRoot, "harness-kit-example/nextjs-acme/harness.yaml"),
     tmp,
   );
-  assertActualSubsetOfExpected(tmp, join(repoRoot, "example/nextjs-acme/.harness"));
+  assertActualSubsetOfExpected(tmp, join(repoRoot, "harness-kit-example/nextjs-acme/.harness"));
 });
 ```
 
@@ -250,16 +250,16 @@ git commit -m "test: add fixture round-trip test (vacuously green)"
 
 ---
 
-## Task 2: Verify `example/nextjs-acme/harness.yaml`
+## Task 2: Verify `harness-kit-example/nextjs-acme/harness.yaml`
 
 This file already exists from the doc-update sweep. Sanity-check it matches the schema before downstream tasks depend on it.
 
 **Files:**
-- Modify (if needed): `example/nextjs-acme/harness.yaml`
+- Modify (if needed): `harness-kit-example/nextjs-acme/harness.yaml`
 
 - [ ] **Step 1: Print and confirm shape**
 
-Run: `cat example/nextjs-acme/harness.yaml`
+Run: `cat harness-kit-example/nextjs-acme/harness.yaml`
 Expected: contains `preset: nextjs`, `name: acme-notes`, `displayName: Acme Notes`, `overview`, `stack`, `contract`, `references: [auth-js-llms]`. No `extras:`. No `docs:` / `skills:` / `permissions:` at the top level.
 
 Canonical content (reset to this if drift is found):
@@ -302,7 +302,7 @@ Expected: PASS (vacuous).
 - [ ] **Step 3: Commit if edited**
 
 ```bash
-git add example/nextjs-acme/harness.yaml
+git add harness-kit-example/nextjs-acme/harness.yaml
 git commit -m "chore(example): reconfirm acme harness.yaml matches v1 schema"
 ```
 
@@ -313,9 +313,9 @@ git commit -m "chore(example): reconfirm acme harness.yaml matches v1 schema"
 The hand-curated `SKILLS.md` that the compiler must reproduce byte-for-byte.
 
 **Files:**
-- Create: `example/nextjs-acme/.harness/SKILLS.md`
+- Create: `harness-kit-example/nextjs-acme/.harness/SKILLS.md`
 
-- [ ] **Step 1: Create `example/nextjs-acme/.harness/SKILLS.md`**
+- [ ] **Step 1: Create `harness-kit-example/nextjs-acme/.harness/SKILLS.md`**
 
 ```markdown
 # Installed Skills
@@ -365,7 +365,7 @@ Expected: PASS (vacuous).
 - [ ] **Step 3: Commit**
 
 ```bash
-git add example/nextjs-acme/.harness/SKILLS.md
+git add harness-kit-example/nextjs-acme/.harness/SKILLS.md
 git commit -m "feat(example): expand acme target with SKILLS.md"
 ```
 
@@ -375,7 +375,7 @@ git commit -m "feat(example): expand acme target with SKILLS.md"
 
 **Files:**
 - Create: `references-pool/auth-js-llms.txt`
-- Create: `example/nextjs-acme/.harness/docs/references/auth-js-llms.txt`
+- Create: `harness-kit-example/nextjs-acme/.harness/docs/references/auth-js-llms.txt`
 
 - [ ] **Step 1: Create `references-pool/auth-js-llms.txt`**
 
@@ -391,7 +391,7 @@ See https://authjs.dev for the real documentation.
 
 - [ ] **Step 2: Copy to target**
 
-Run: `mkdir -p example/nextjs-acme/.harness/docs/references && cp references-pool/auth-js-llms.txt example/nextjs-acme/.harness/docs/references/auth-js-llms.txt`
+Run: `mkdir -p harness-kit-example/nextjs-acme/.harness/docs/references && cp references-pool/auth-js-llms.txt harness-kit-example/nextjs-acme/.harness/docs/references/auth-js-llms.txt`
 
 - [ ] **Step 3: Re-run test**
 
@@ -401,7 +401,7 @@ Expected: PASS (vacuous).
 - [ ] **Step 4: Commit**
 
 ```bash
-git add references-pool/auth-js-llms.txt example/nextjs-acme/.harness/docs/references/auth-js-llms.txt
+git add references-pool/auth-js-llms.txt harness-kit-example/nextjs-acme/.harness/docs/references/auth-js-llms.txt
 git commit -m "feat: add auth-js reference to pool and acme target"
 ```
 
@@ -412,7 +412,7 @@ git commit -m "feat: add auth-js reference to pool and acme target"
 The settings file carries: a permissions block (merged from each enabled plugin's `permissions.json`; for acme only `nextjs` ships one), a plugin list (the resolved id list), and (when any plugin ships hooks) a hooks block (acme has none).
 
 **Files:**
-- Create: `example/nextjs-acme/.harness/.claude/settings.example.json`
+- Create: `harness-kit-example/nextjs-acme/.harness/.claude/settings.example.json`
 
 - [ ] **Step 1: Create the file**
 
@@ -453,7 +453,7 @@ Expected: PASS (vacuous).
 - [ ] **Step 3: Commit**
 
 ```bash
-git add example/nextjs-acme/.harness/.claude/settings.example.json
+git add harness-kit-example/nextjs-acme/.harness/.claude/settings.example.json
 git commit -m "feat(example): expand acme target with settings.example.json"
 ```
 
@@ -538,7 +538,7 @@ For any project that benefits from a disciplined brainstorm → spec → plan �
 }
 ```
 
-**Critical:** The `description` and `whenToUse` strings here MUST match the corresponding text in `example/nextjs-acme/.harness/SKILLS.md` (Task 3) word-for-word.
+**Critical:** The `description` and `whenToUse` strings here MUST match the corresponding text in `harness-kit-example/nextjs-acme/.harness/SKILLS.md` (Task 3) word-for-word.
 
 - [ ] **Step 5: Re-run test**
 
@@ -597,7 +597,7 @@ When you want the agent to review the current diff for correctness bugs before o
 }
 ```
 
-`description` and `whenToUse` MUST match `example/nextjs-acme/.harness/SKILLS.md` (Task 3) word-for-word.
+`description` and `whenToUse` MUST match `harness-kit-example/nextjs-acme/.harness/SKILLS.md` (Task 3) word-for-word.
 
 - [ ] **Step 3: Re-run test**
 
@@ -678,7 +678,7 @@ git commit -m "feat: add nextjs plugin skeleton (README + permissions)"
 
 ## Task 9: `plugins/nextjs/docs/agent-guide/` → `AGENTS.md`
 
-The first and largest doc fragment. Strategy: read `example/nextjs-acme/.harness/AGENTS.md`, identify project-specific strings, replace with `<%= var %>` placeholders, declare in `manifest.ts`'s `paramsSchema`.
+The first and largest doc fragment. Strategy: read `harness-kit-example/nextjs-acme/.harness/AGENTS.md`, identify project-specific strings, replace with `<%= var %>` placeholders, declare in `manifest.ts`'s `paramsSchema`.
 
 The yaml in Task 2 supplies the required params (`displayName`, `overview`, `stack.*`, `contract.*`). Templates may also reference compiler-injected derived params (`<%= skillsSection %>`, `<%= referencesList %>`).
 
@@ -688,7 +688,7 @@ The yaml in Task 2 supplies the required params (`displayName`, `overview`, `sta
 
 - [ ] **Step 1: Read the source**
 
-Run: `cat example/nextjs-acme/.harness/AGENTS.md`
+Run: `cat harness-kit-example/nextjs-acme/.harness/AGENTS.md`
 
 - [ ] **Step 2: Create `plugins/nextjs/docs/agent-guide/manifest.ts`**
 
@@ -784,7 +784,7 @@ git commit -m "feat(nextjs): add agent-guide doc fragment"
 
 - [ ] **Step 1: Read the source**
 
-Run: `cat example/nextjs-acme/.harness/ARCHITECTURE.md`
+Run: `cat harness-kit-example/nextjs-acme/.harness/ARCHITECTURE.md`
 
 - [ ] **Step 2: Create `plugins/nextjs/docs/architecture/manifest.ts`**
 
@@ -805,7 +805,7 @@ export const outputPath = "ARCHITECTURE.md";
 
 - [ ] **Step 3: Create `plugins/nextjs/docs/architecture/template.md`**
 
-Copy `example/nextjs-acme/.harness/ARCHITECTURE.md` verbatim. Replace the top-level heading `# Acme Notes — Architecture` with `# <%= displayName %> — Architecture`. Leave the rest verbatim for v0.
+Copy `harness-kit-example/nextjs-acme/.harness/ARCHITECTURE.md` verbatim. Replace the top-level heading `# Acme Notes — Architecture` with `# <%= displayName %> — Architecture`. Leave the rest verbatim for v0.
 
 - [ ] **Step 4: Re-run test**
 
@@ -829,7 +829,7 @@ git commit -m "feat(nextjs): add architecture doc fragment"
 
 - [ ] **Step 1: Read the source**
 
-Run: `cat example/nextjs-acme/.harness/docs/PLANS.md`
+Run: `cat harness-kit-example/nextjs-acme/.harness/docs/PLANS.md`
 
 - [ ] **Step 2: Create `plugins/nextjs/docs/planning-conventions/manifest.ts`**
 
@@ -845,7 +845,7 @@ export const outputPath = "docs/PLANS.md";
 
 - [ ] **Step 3: Create `plugins/nextjs/docs/planning-conventions/template.md`**
 
-Copy `example/nextjs-acme/.harness/docs/PLANS.md` verbatim. Replace the top-level heading `# Acme Notes — Plans Overview` with `# <%= displayName %> — Plans Overview`. Leave the rest verbatim.
+Copy `harness-kit-example/nextjs-acme/.harness/docs/PLANS.md` verbatim. Replace the top-level heading `# Acme Notes — Plans Overview` with `# <%= displayName %> — Plans Overview`. Leave the rest verbatim.
 
 - [ ] **Step 4: Re-run test**
 
@@ -869,7 +869,7 @@ git commit -m "feat(nextjs): add planning-conventions doc fragment"
 
 - [ ] **Step 1: Read the source**
 
-Run: `cat example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md`
+Run: `cat harness-kit-example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md`
 
 - [ ] **Step 2: Create `plugins/nextjs/docs/product-sense/manifest.ts`**
 
@@ -885,7 +885,7 @@ export const outputPath = "docs/PRODUCT_SENSE.md";
 
 - [ ] **Step 3: Create `plugins/nextjs/docs/product-sense/template.md`**
 
-Copy `example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md` verbatim. Replace the top-level heading `# Acme Notes — Product Vision and Sense` with `# <%= displayName %> — Product Vision and Sense`. Leave the rest verbatim.
+Copy `harness-kit-example/nextjs-acme/.harness/docs/PRODUCT_SENSE.md` verbatim. Replace the top-level heading `# Acme Notes — Product Vision and Sense` with `# <%= displayName %> — Product Vision and Sense`. Leave the rest verbatim.
 
 - [ ] **Step 4: Re-run test**
 
