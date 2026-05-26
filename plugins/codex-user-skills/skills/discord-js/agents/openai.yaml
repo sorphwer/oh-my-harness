@@ -1,0 +1,4 @@
+interface:
+  display_name: "Discord.js Guide"
+  short_description: "Implement Discord bots with discord.js best practices"
+  default_prompt: "Use $discord-js to build, debug, or refactor Discord bot features using official discord.js APIs and patterns."

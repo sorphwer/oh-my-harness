@@ -1,0 +1,126 @@
+[
+  {
+    "id": "pyrefly-orientation",
+    "name": "Pyrefly Orientation",
+    "phase": "brainstorm",
+    "description": "Identify the affected Pyrefly architecture phase and checkout environment before implementation.",
+    "triggers": [
+      "new task",
+      "bug report",
+      "GitHub issue"
+    ],
+    "requires": [
+      "local source context"
+    ],
+    "outputs": [
+      "affected area",
+      "build tool",
+      "vcs"
+    ],
+    "gates": [
+      "environment-detected",
+      "architecture-fit"
+    ]
+  },
+  {
+    "id": "regression-planning",
+    "name": "Regression Planning",
+    "phase": "plan",
+    "description": "Choose the smallest code path and regression test that prove the intended type-checker or LSP behavior.",
+    "triggers": [
+      "behavior change",
+      "bug fix",
+      "broad refactor"
+    ],
+    "requires": [
+      "affected area"
+    ],
+    "outputs": [
+      "implementation plan",
+      "test command"
+    ],
+    "gates": [
+      "needs-plan",
+      "regression-considered"
+    ]
+  },
+  {
+    "id": "pyrefly-implementation",
+    "name": "Pyrefly Implementation",
+    "phase": "implement",
+    "description": "Implement minimal Rust changes using existing helpers and explicit invariants.",
+    "triggers": [
+      "ready task"
+    ],
+    "requires": [
+      "implementation plan"
+    ],
+    "outputs": [
+      "code changes",
+      "test changes"
+    ],
+    "gates": [
+      "architecture-fit",
+      "regression-considered"
+    ]
+  },
+  {
+    "id": "pyrefly-verification",
+    "name": "Pyrefly Verification",
+    "phase": "test",
+    "description": "Run targeted Cargo or Buck tests and the repository formatting/linting driver.",
+    "triggers": [
+      "completed implementation",
+      "before handoff"
+    ],
+    "requires": [
+      "code changes"
+    ],
+    "outputs": [
+      "test evidence",
+      "lint evidence"
+    ],
+    "gates": [
+      "needs-tests",
+      "format-lint"
+    ]
+  },
+  {
+    "id": "pyrefly-review-prep",
+    "name": "Pyrefly Review Prep",
+    "phase": "review",
+    "description": "Prepare a semantics-focused summary with risk and verification evidence.",
+    "triggers": [
+      "before PR",
+      "handoff"
+    ],
+    "requires": [
+      "test evidence"
+    ],
+    "outputs": [
+      "review summary"
+    ],
+    "gates": [
+      "needs-tests"
+    ]
+  },
+  {
+    "id": "process-record",
+    "name": "Process Record",
+    "phase": "record",
+    "description": "Record durable harness or workflow changes without logging routine implementation noise.",
+    "triggers": [
+      "harness change",
+      "workflow change"
+    ],
+    "requires": [
+      "review summary"
+    ],
+    "outputs": [
+      "change log entry"
+    ],
+    "gates": [
+      "record-process-change"
+    ]
+  }
+]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Google AIP API Design"
+  short_description: "Design backend APIs that follow Google AIP."
+  default_prompt: "Use $google-aip-api-design to design or refactor this backend API so it follows google.aip.dev conventions."

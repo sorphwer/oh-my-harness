@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use JSON Render CLI"
+  short_description: "Render tables/cards PNGs with routed references"
+  default_prompt: "Use $use-json-render-cli to render a PNG and load only the matching use-case reference (table, ticket-table, info-cards, announcement-cards, or flow-summary)."

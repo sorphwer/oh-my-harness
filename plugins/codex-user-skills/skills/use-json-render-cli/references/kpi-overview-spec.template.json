@@ -1,0 +1,110 @@
+{
+  "root": "root",
+  "elements": {
+    "root": {
+      "type": "Column",
+      "props": { "gap": 10, "style": { "background": "#ffffff" } },
+      "children": ["header", "metricsRow"]
+    },
+
+    "header": {
+      "type": "Row",
+      "props": {
+        "gap": 12,
+        "justify": "space-between",
+        "align": "center",
+        "padding": "8px 4px"
+      },
+      "children": ["titleText", "updatedBadge"]
+    },
+    "titleText": {
+      "type": "Heading",
+      "props": { "text": "__TITLE__", "level": 3, "size": 26, "weight": 700, "color": "#0f172a" }
+    },
+    "updatedBadge": {
+      "type": "Badge",
+      "props": {
+        "text": "Updated __UPDATED_AT__",
+        "background": "#e2e8f0",
+        "color": "#334155",
+        "padding": "6px 10px",
+        "size": 12,
+        "weight": 600
+      }
+    },
+
+    "metricsRow": {
+      "type": "Row",
+      "props": { "gap": 8, "align": "stretch" },
+      "children": ["m1Card", "m2Card", "m3Card", "m4Card"]
+    },
+
+    "m1Card": {
+      "type": "Container",
+      "props": {
+        "width": 244,
+        "padding": "14px",
+        "gap": 8,
+        "style": { "border": "1px solid #cbd5e1", "background": "#f8fafc" }
+      },
+      "children": ["m1Label", "m1Value", "m1Delta"]
+    },
+    "m1Label": { "type": "Text", "props": { "text": "__M1_LABEL__", "size": 13, "weight": 600, "color": "#475569" } },
+    "m1Value": { "type": "Heading", "props": { "text": "__M1_VALUE__", "level": 4, "size": 30, "weight": 700, "color": "#0f172a" } },
+    "m1Delta": {
+      "type": "Badge",
+      "props": { "text": "__M1_DELTA__", "background": "#dcfce7", "color": "#166534", "padding": "4px 10px", "size": 12, "weight": 700 }
+    },
+
+    "m2Card": {
+      "type": "Container",
+      "props": {
+        "width": 244,
+        "padding": "14px",
+        "gap": 8,
+        "style": { "border": "1px solid #cbd5e1", "background": "#f8fafc" }
+      },
+      "children": ["m2Label", "m2Value", "m2Delta"]
+    },
+    "m2Label": { "type": "Text", "props": { "text": "__M2_LABEL__", "size": 13, "weight": 600, "color": "#475569" } },
+    "m2Value": { "type": "Heading", "props": { "text": "__M2_VALUE__", "level": 4, "size": 30, "weight": 700, "color": "#0f172a" } },
+    "m2Delta": {
+      "type": "Badge",
+      "props": { "text": "__M2_DELTA__", "background": "#dcfce7", "color": "#166534", "padding": "4px 10px", "size": 12, "weight": 700 }
+    },
+
+    "m3Card": {
+      "type": "Container",
+      "props": {
+        "width": 244,
+        "padding": "14px",
+        "gap": 8,
+        "style": { "border": "1px solid #cbd5e1", "background": "#f8fafc" }
+      },
+      "children": ["m3Label", "m3Value", "m3Delta"]
+    },
+    "m3Label": { "type": "Text", "props": { "text": "__M3_LABEL__", "size": 13, "weight": 600, "color": "#475569" } },
+    "m3Value": { "type": "Heading", "props": { "text": "__M3_VALUE__", "level": 4, "size": 30, "weight": 700, "color": "#0f172a" } },
+    "m3Delta": {
+      "type": "Badge",
+      "props": { "text": "__M3_DELTA__", "background": "#dcfce7", "color": "#166534", "padding": "4px 10px", "size": 12, "weight": 700 }
+    },
+
+    "m4Card": {
+      "type": "Container",
+      "props": {
+        "width": 244,
+        "padding": "14px",
+        "gap": 8,
+        "style": { "border": "1px solid #cbd5e1", "background": "#f8fafc" }
+      },
+      "children": ["m4Label", "m4Value", "m4Delta"]
+    },
+    "m4Label": { "type": "Text", "props": { "text": "__M4_LABEL__", "size": 13, "weight": 600, "color": "#475569" } },
+    "m4Value": { "type": "Heading", "props": { "text": "__M4_VALUE__", "level": 4, "size": 30, "weight": 700, "color": "#0f172a" } },
+    "m4Delta": {
+      "type": "Badge",
+      "props": { "text": "__M4_DELTA__", "background": "#dcfce7", "color": "#166534", "padding": "4px 10px", "size": 12, "weight": 700 }
+    }
+  }
+}

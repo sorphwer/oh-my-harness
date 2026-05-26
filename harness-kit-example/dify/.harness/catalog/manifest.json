@@ -1,0 +1,384 @@
+{
+  "contextSources": [
+    {
+      "id": "pyrefly-readme",
+      "name": "Pyrefly README",
+      "trust": "repository",
+      "url": "README.md"
+    },
+    {
+      "id": "pyrefly-architecture",
+      "name": "Pyrefly architecture",
+      "trust": "repository",
+      "url": "ARCHITECTURE.md"
+    },
+    {
+      "id": "project-agents",
+      "name": "Project agent instructions",
+      "trust": "repository",
+      "url": "AGENTS.md"
+    },
+    {
+      "id": "rust-docs",
+      "name": "Rust docs",
+      "trust": "official",
+      "url": "https://doc.rust-lang.org"
+    },
+    {
+      "id": "cargo-docs",
+      "name": "Cargo docs",
+      "trust": "official",
+      "url": "https://doc.rust-lang.org/cargo/"
+    },
+    {
+      "id": "python-typing-docs",
+      "name": "Python typing docs",
+      "trust": "official",
+      "url": "https://docs.python.org/3/library/typing.html"
+    },
+    {
+      "id": "lsp-spec",
+      "name": "Language Server Protocol specification",
+      "trust": "official",
+      "url": "https://microsoft.github.io/language-server-protocol/"
+    }
+  ],
+  "gates": [
+    {
+      "id": "environment-detected",
+      "name": "Environment detected",
+      "severity": "required",
+      "description": "Choose Buck versus Cargo and Git versus Sapling before build, test, or source-control commands."
+    },
+    {
+      "id": "architecture-fit",
+      "name": "Architecture fit checked",
+      "severity": "required",
+      "description": "Identify the affected Pyrefly area before editing shared type-checker behavior."
+    },
+    {
+      "id": "needs-plan",
+      "name": "Plan before broad change",
+      "severity": "required",
+      "description": "Require a plan for broad, cross-phase, or risky changes."
+    },
+    {
+      "id": "regression-considered",
+      "name": "Regression considered",
+      "severity": "required",
+      "description": "Add or update a targeted test for behavior changes, or explain why no test is appropriate."
+    },
+    {
+      "id": "needs-tests",
+      "name": "Verify before completion",
+      "severity": "required",
+      "description": "Do not claim completion without verification evidence or a clear explanation of why verification could not run."
+    },
+    {
+      "id": "format-lint",
+      "name": "Format and lint before handoff",
+      "severity": "required",
+      "description": "Run the repository formatting/linting driver before handing code off."
+    },
+    {
+      "id": "record-process-change",
+      "name": "Record process change",
+      "severity": "recommended",
+      "description": "Record notable harness or workflow changes after implementation."
+    }
+  ],
+  "rules": [
+    {
+      "id": "architecture-fit",
+      "name": "Architecture Fit",
+      "description": "Place changes in the matching Pyrefly architecture phase or product area.",
+      "impact": "critical"
+    },
+    {
+      "id": "correctness-over-fallbacks",
+      "name": "Correctness Over Fallbacks",
+      "description": "Unreachable type-checker states must panic with a clear invariant instead of silently degrading.",
+      "impact": "critical"
+    },
+    {
+      "id": "minimal-rust",
+      "name": "Minimal Rust",
+      "description": "Prefer simple local changes and avoid single-use helpers unless they clarify real invariants.",
+      "impact": "high"
+    },
+    {
+      "id": "type-representation-discipline",
+      "name": "Type Representation Discipline",
+      "description": "Prefer existing pyrefly_types helpers before manually constructing or destructuring Type values.",
+      "impact": "high"
+    },
+    {
+      "id": "semantic-extraction",
+      "name": "Semantic Extraction",
+      "description": "Extract semantic facts early instead of passing parsed Expr nodes through unrelated layers.",
+      "impact": "high"
+    },
+    {
+      "id": "build-vcs-discipline",
+      "name": "Build and VCS Discipline",
+      "description": "Detect Buck/Cargo and Sapling/Git before running commands.",
+      "impact": "high"
+    },
+    {
+      "id": "testing-standards",
+      "name": "Testing Standards",
+      "description": "Use targeted regression tests and the project formatting/linting driver before handoff.",
+      "impact": "high"
+    }
+  ],
+  "skills": [
+    {
+      "id": "pyrefly-orientation",
+      "name": "Pyrefly Orientation",
+      "phase": "brainstorm",
+      "description": "Identify the affected Pyrefly architecture phase and checkout environment before implementation.",
+      "triggers": [
+        "new task",
+        "bug report",
+        "GitHub issue"
+      ],
+      "requires": [
+        "local source context"
+      ],
+      "outputs": [
+        "affected area",
+        "build tool",
+        "vcs"
+      ],
+      "gates": [
+        "environment-detected",
+        "architecture-fit"
+      ]
+    },
+    {
+      "id": "regression-planning",
+      "name": "Regression Planning",
+      "phase": "plan",
+      "description": "Choose the smallest code path and regression test that prove the intended type-checker or LSP behavior.",
+      "triggers": [
+        "behavior change",
+        "bug fix",
+        "broad refactor"
+      ],
+      "requires": [
+        "affected area"
+      ],
+      "outputs": [
+        "implementation plan",
+        "test command"
+      ],
+      "gates": [
+        "needs-plan",
+        "regression-considered"
+      ]
+    },
+    {
+      "id": "pyrefly-implementation",
+      "name": "Pyrefly Implementation",
+      "phase": "implement",
+      "description": "Implement minimal Rust changes using existing helpers and explicit invariants.",
+      "triggers": [
+        "ready task"
+      ],
+      "requires": [
+        "implementation plan"
+      ],
+      "outputs": [
+        "code changes",
+        "test changes"
+      ],
+      "gates": [
+        "architecture-fit",
+        "regression-considered"
+      ]
+    },
+    {
+      "id": "pyrefly-verification",
+      "name": "Pyrefly Verification",
+      "phase": "test",
+      "description": "Run targeted Cargo or Buck tests and the repository formatting/linting driver.",
+      "triggers": [
+        "completed implementation",
+        "before handoff"
+      ],
+      "requires": [
+        "code changes"
+      ],
+      "outputs": [
+        "test evidence",
+        "lint evidence"
+      ],
+      "gates": [
+        "needs-tests",
+        "format-lint"
+      ]
+    },
+    {
+      "id": "pyrefly-review-prep",
+      "name": "Pyrefly Review Prep",
+      "phase": "review",
+      "description": "Prepare a semantics-focused summary with risk and verification evidence.",
+      "triggers": [
+        "before PR",
+        "handoff"
+      ],
+      "requires": [
+        "test evidence"
+      ],
+      "outputs": [
+        "review summary"
+      ],
+      "gates": [
+        "needs-tests"
+      ]
+    },
+    {
+      "id": "process-record",
+      "name": "Process Record",
+      "phase": "record",
+      "description": "Record durable harness or workflow changes without logging routine implementation noise.",
+      "triggers": [
+        "harness change",
+        "workflow change"
+      ],
+      "requires": [
+        "review summary"
+      ],
+      "outputs": [
+        "change log entry"
+      ],
+      "gates": [
+        "record-process-change"
+      ]
+    }
+  ],
+  "stack": {
+    "id": "rust-python-typechecker-lsp",
+    "name": "Rust Python type checker and LSP",
+    "version": "repository-defined",
+    "description": "Pyrefly is a Rust workspace for Python type checking and language-server behavior, with Python fixtures and tooling.",
+    "docSourceIds": [
+      "pyrefly-readme",
+      "pyrefly-architecture",
+      "project-agents",
+      "rust-docs",
+      "cargo-docs",
+      "python-typing-docs",
+      "lsp-spec"
+    ],
+    "mcpTools": [],
+    "recommendedRuleIds": [
+      "architecture-fit",
+      "correctness-over-fallbacks",
+      "minimal-rust",
+      "type-representation-discipline",
+      "semantic-extraction",
+      "build-vcs-discipline",
+      "testing-standards"
+    ],
+    "recommendedSkillIds": [
+      "pyrefly-orientation",
+      "regression-planning",
+      "pyrefly-implementation",
+      "pyrefly-verification",
+      "pyrefly-review-prep",
+      "process-record"
+    ],
+    "recommendedWorkflowIds": [
+      "brainstorm",
+      "plan",
+      "implement",
+      "test",
+      "review",
+      "record"
+    ],
+    "recommendedGateIds": [
+      "environment-detected",
+      "architecture-fit",
+      "needs-plan",
+      "regression-considered",
+      "needs-tests",
+      "format-lint",
+      "record-process-change"
+    ]
+  },
+  "workflows": [
+    {
+      "id": "brainstorm",
+      "name": "Brainstorm",
+      "phase": "brainstorm",
+      "entryCriteria": [
+        "New, ambiguous, or issue-driven work"
+      ],
+      "exitCriteria": [
+        "Behavior target identified",
+        "Affected Pyrefly area identified"
+      ]
+    },
+    {
+      "id": "plan",
+      "name": "Plan",
+      "phase": "plan",
+      "entryCriteria": [
+        "Behavior target is known"
+      ],
+      "exitCriteria": [
+        "Scoped implementation path",
+        "Targeted test command",
+        "Formatting/linting command"
+      ]
+    },
+    {
+      "id": "implement",
+      "name": "Implement",
+      "phase": "implement",
+      "entryCriteria": [
+        "Task and verification path selected"
+      ],
+      "exitCriteria": [
+        "Minimal code changes complete",
+        "Regression coverage added or explained"
+      ]
+    },
+    {
+      "id": "test",
+      "name": "Test",
+      "phase": "test",
+      "entryCriteria": [
+        "Implementation complete"
+      ],
+      "exitCriteria": [
+        "Targeted verification captured",
+        "Formatting and linting attempted"
+      ]
+    },
+    {
+      "id": "review",
+      "name": "Review",
+      "phase": "review",
+      "entryCriteria": [
+        "Verification attempted"
+      ],
+      "exitCriteria": [
+        "Review-ready behavior summary",
+        "Risk and test evidence documented"
+      ]
+    },
+    {
+      "id": "record",
+      "name": "Record",
+      "phase": "record",
+      "entryCriteria": [
+        "Change complete"
+      ],
+      "exitCriteria": [
+        "Durable process changes recorded when applicable"
+      ]
+    }
+  ]
+}

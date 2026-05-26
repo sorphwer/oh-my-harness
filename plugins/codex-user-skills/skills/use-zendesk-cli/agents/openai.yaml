@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Zendesk CLI"
+  short_description: "Run and troubleshoot Zendesk CLI workflows"
+  default_prompt: "Use $use-zendesk-cli to run ticket/attachment/help-center docs commands with agent-friendly output."

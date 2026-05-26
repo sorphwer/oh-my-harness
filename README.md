@@ -49,6 +49,7 @@ harness-kit is not a hook enforcement framework. `kyu1204/oh-my-harness` (npm `o
 ## Repo Tour
 
 - [`.harness/`](.harness/) - this repo's hand-bootstrapped process harness.
+- [`plugins/INDEX.md`](plugins/INDEX.md) - current copied plugin and skill inventory.
 - [`example/nextjs/.harness/`](example/nextjs/.harness/) - the stdlib harness skeleton.
 - [`example/nextjs-acme/`](example/nextjs-acme/) - a filled-in demo using the same skeleton.
 - [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) - tiny agent entry points that redirect to `.harness/`.

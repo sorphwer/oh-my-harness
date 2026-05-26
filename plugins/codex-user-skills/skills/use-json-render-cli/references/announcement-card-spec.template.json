@@ -1,0 +1,72 @@
+{
+  "root": "root",
+  "elements": {
+    "root": {
+      "type": "Container",
+      "props": {
+        "width": 960,
+        "padding": "24px",
+        "gap": 14,
+        "style": {
+          "border": "1px solid #334155",
+          "background": "#0f172a"
+        }
+      },
+      "children": ["kicker", "title", "summary", "ctaRow"]
+    },
+
+    "kicker": {
+      "type": "Badge",
+      "props": {
+        "text": "__BADGE_TEXT__",
+        "background": "#1e293b",
+        "color": "#93c5fd",
+        "padding": "6px 10px",
+        "size": 12,
+        "weight": 700
+      }
+    },
+
+    "title": {
+      "type": "Heading",
+      "props": {
+        "text": "__TITLE__",
+        "level": 2,
+        "size": 40,
+        "weight": 800,
+        "color": "#f8fafc"
+      }
+    },
+
+    "summary": {
+      "type": "Text",
+      "props": {
+        "text": "__SUMMARY__",
+        "size": 17,
+        "lineHeight": 1.5,
+        "weight": 500,
+        "color": "#cbd5e1"
+      }
+    },
+
+    "ctaRow": {
+      "type": "Row",
+      "props": {
+        "justify": "flex-start"
+      },
+      "children": ["ctaButton"]
+    },
+    "ctaButton": {
+      "type": "Button",
+      "props": {
+        "text": "__CTA_TEXT__",
+        "background": "#0070c9",
+        "color": "#ffffff",
+        "padding": "10px 16px",
+        "size": 14,
+        "weight": 700,
+        "radius": 999
+      }
+    }
+  }
+}

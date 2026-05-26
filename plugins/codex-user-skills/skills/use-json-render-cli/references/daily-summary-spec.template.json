@@ -1,0 +1,69 @@
+{
+  "root": "root",
+  "elements": {
+    "root": {
+      "type": "Container",
+      "props": {
+        "width": 960,
+        "padding": "16px",
+        "gap": 14,
+        "style": { "border": "1px solid #cbd5e1", "background": "#ffffff" }
+      },
+      "children": ["header", "keyRow", "summaryText", "updatedText"]
+    },
+
+    "header": {
+      "type": "Heading",
+      "props": { "text": "__TITLE__", "level": 3, "size": 28, "weight": 700, "color": "#0f172a" }
+    },
+
+    "keyRow": {
+      "type": "Row",
+      "props": { "gap": 8 },
+      "children": ["key1", "key2", "key3"]
+    },
+    "key1": {
+      "type": "Badge",
+      "props": {
+        "text": "__KEY_1__",
+        "background": "#dbeafe",
+        "color": "#1e3a8a",
+        "padding": "8px 12px",
+        "size": 13,
+        "weight": 700
+      }
+    },
+    "key2": {
+      "type": "Badge",
+      "props": {
+        "text": "__KEY_2__",
+        "background": "#dcfce7",
+        "color": "#166534",
+        "padding": "8px 12px",
+        "size": 13,
+        "weight": 700
+      }
+    },
+    "key3": {
+      "type": "Badge",
+      "props": {
+        "text": "__KEY_3__",
+        "background": "#fee2e2",
+        "color": "#b91c1c",
+        "padding": "8px 12px",
+        "size": 13,
+        "weight": 700
+      }
+    },
+
+    "summaryText": {
+      "type": "Text",
+      "props": { "text": "__SUMMARY__", "size": 16, "lineHeight": 1.5, "weight": 500, "color": "#1e293b" }
+    },
+
+    "updatedText": {
+      "type": "Text",
+      "props": { "text": "Updated __UPDATED_AT__", "size": 13, "weight": 600, "color": "#64748b" }
+    }
+  }
+}

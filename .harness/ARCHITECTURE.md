@@ -41,6 +41,7 @@ Natural language intent
 Local content directories:
 
 plugins/<id>/      -> self-contained bundles (any of: README.md, skills/, agents/, hooks/, docs/, permissions.json)
+plugins/INDEX.md   -> browsable inventory of copied current Codex plugins + standalone skills
 references-pool/   -> shared raw LLM-readable reference files
 presets/<name>.ts  -> named plugin id lists (post-v0; hardcoded in compiler for v0)
 ```
@@ -89,7 +90,7 @@ The single unit of reusable content. A plugin is a directory under `plugins/<id>
 | `docs/<name>/{manifest.ts, template.md}` | optional, 0..N | one rendered file at the path the manifest declares |
 | `permissions.json` | optional, 0..1 | merged into the `permissions` block of `.harness/.claude/settings.example.json` |
 
-A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks}` using `<plugin>:<name>` ids without enabling the whole plugin.
+A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. This repo also contains copied Codex plugin bundles whose original metadata is preserved under `.codex-plugin/plugin.json`; standalone active Codex skills are grouped into harness-local container plugins so the compiler can address them through the same `plugins/<id>/skills/<name>/SKILL.md` layout. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks}` using `<plugin>:<name>` ids without enabling the whole plugin.
 
 ### Reference File
 
@@ -160,4 +161,3 @@ stateDiagram-v2
 - Render failures include the fragment id and output path where possible.
 - Emit failures include the target path.
 - The compiler leaves unrelated files in `outDir` untouched.
-

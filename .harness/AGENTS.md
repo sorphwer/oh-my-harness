@@ -64,7 +64,7 @@ Content directories (current):
   - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
   - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
 
-  On disk today: `planning`, `debugging`, `frontend`, `backend`, `delivery`, `security-review` (each a skills-only plugin migrated from the previous `skills-pool/`). The `nextjs` stack plugin (docs + permissions) is added during v1 compiler implementation.
+  On disk today: the original bootstrap skills-only plugins (`planning`, `debugging`, `frontend`, `backend`, `delivery`, `security-review`) plus a copied snapshot of the current Codex session's real plugin and standalone skill inventory. Start from `plugins/INDEX.md` when you need the active inventory. The copied snapshot includes the enabled Codex plugins (`browser`, `codex-security`, `computer-use`, `documents`, `github`, `presentations`, `spreadsheets`, `superpowers`) and two harness-local containers for active standalone skills (`codex-system-skills`, `codex-user-skills`).
 - `references-pool/` - shared raw LLM-readable reference files
 - `presets/<name>.ts` - named plugin id lists (post-v0; hardcoded in compiler for v0)
 

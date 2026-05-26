@@ -1,0 +1,66 @@
+{
+  "root": "root",
+  "elements": {
+    "root": {
+      "type": "Column",
+      "props": { "gap": 10, "style": { "background": "#ffffff", "border": "1px solid #cbd5e1" } },
+      "children": ["header", "panelsRow"]
+    },
+
+    "header": {
+      "type": "Row",
+      "props": {
+        "gap": 12,
+        "justify": "space-between",
+        "align": "center",
+        "padding": "12px 14px",
+        "style": { "background": "#f8fafc", "borderBottom": "1px solid #cbd5e1" }
+      },
+      "children": ["titleText", "updatedText"]
+    },
+    "titleText": { "type": "Heading", "props": { "text": "__TITLE__", "level": 3, "size": 24, "weight": 700, "color": "#0f172a" } },
+    "updatedText": { "type": "Text", "props": { "text": "Updated __UPDATED_AT__", "size": 13, "weight": 600, "color": "#475569" } },
+
+    "panelsRow": {
+      "type": "Row",
+      "props": { "gap": 8, "padding": "10px" },
+      "children": ["leftPanel", "rightPanel"]
+    },
+
+    "leftPanel": {
+      "type": "Column",
+      "props": { "width": 496, "gap": 8, "padding": "12px", "style": { "border": "1px solid #e2e8f0", "background": "#ffffff" } },
+      "children": ["leftTitle", "lRow1", "lDiv1", "lRow2", "lDiv2", "lRow3"]
+    },
+    "leftTitle": { "type": "Heading", "props": { "text": "__LEFT_TITLE__", "level": 4, "size": 18, "weight": 700, "color": "#0f172a" } },
+    "lRow1": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["l1Label", "l1Value"] },
+    "l1Label": { "type": "Text", "props": { "text": "__R1_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "l1Value": { "type": "Text", "props": { "text": "__R1_LEFT__", "size": 17, "weight": 700, "color": "#0f172a" } },
+    "lDiv1": { "type": "Divider", "props": { "color": "#e2e8f0", "thickness": 1, "margin": "2px 0" } },
+    "lRow2": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["l2Label", "l2Value"] },
+    "l2Label": { "type": "Text", "props": { "text": "__R2_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "l2Value": { "type": "Text", "props": { "text": "__R2_LEFT__", "size": 17, "weight": 700, "color": "#0f172a" } },
+    "lDiv2": { "type": "Divider", "props": { "color": "#e2e8f0", "thickness": 1, "margin": "2px 0" } },
+    "lRow3": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["l3Label", "l3Value"] },
+    "l3Label": { "type": "Text", "props": { "text": "__R3_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "l3Value": { "type": "Text", "props": { "text": "__R3_LEFT__", "size": 17, "weight": 700, "color": "#0f172a" } },
+
+    "rightPanel": {
+      "type": "Column",
+      "props": { "width": 496, "gap": 8, "padding": "12px", "style": { "border": "1px solid #e2e8f0", "background": "#ffffff" } },
+      "children": ["rightTitle", "rRow1", "rDiv1", "rRow2", "rDiv2", "rRow3"]
+    },
+    "rightTitle": { "type": "Heading", "props": { "text": "__RIGHT_TITLE__", "level": 4, "size": 18, "weight": 700, "color": "#0f172a" } },
+    "rRow1": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["r1Label", "r1Value"] },
+    "r1Label": { "type": "Text", "props": { "text": "__R1_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "r1Value": { "type": "Text", "props": { "text": "__R1_RIGHT__", "size": 17, "weight": 700, "color": "#0f172a" } },
+    "rDiv1": { "type": "Divider", "props": { "color": "#e2e8f0", "thickness": 1, "margin": "2px 0" } },
+    "rRow2": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["r2Label", "r2Value"] },
+    "r2Label": { "type": "Text", "props": { "text": "__R2_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "r2Value": { "type": "Text", "props": { "text": "__R2_RIGHT__", "size": 17, "weight": 700, "color": "#0f172a" } },
+    "rDiv2": { "type": "Divider", "props": { "color": "#e2e8f0", "thickness": 1, "margin": "2px 0" } },
+    "rRow3": { "type": "Row", "props": { "justify": "space-between", "align": "center" }, "children": ["r3Label", "r3Value"] },
+    "r3Label": { "type": "Text", "props": { "text": "__R3_LABEL__", "size": 14, "weight": 600, "color": "#334155" } },
+    "r3Value": { "type": "Text", "props": { "text": "__R3_RIGHT__", "size": 17, "weight": 700, "color": "#0f172a" } }
+  }
+}
