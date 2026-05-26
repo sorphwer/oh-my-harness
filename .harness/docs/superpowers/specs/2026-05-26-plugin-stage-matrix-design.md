@@ -1,8 +1,8 @@
 # Plugin × Stage Matrix — Design
 
 Date: 2026-05-26
-Status: draft, pending user review
-Extends: [`2026-05-25-harness-yaml-schema-design.md`](2026-05-25-harness-yaml-schema-design.md) (this spec adds an orthogonal axis; the yaml shape and plugin directory layout from that spec are unchanged in spirit but the plugin sub-directory list is broadened — see §10)
+Status: draft; current-inventory approach approved
+Extends: [`2026-05-25-harness-yaml-schema-design.md`](2026-05-25-harness-yaml-schema-design.md) (this spec adds an orthogonal axis; the yaml shape and plugin directory layout from that spec are unchanged in spirit but the plugin sub-directory list is broadened in "Plugin Sub-Directory Layout")
 
 ## Goal
 
@@ -22,6 +22,25 @@ Earlier drafts treated "plugin" as the sole organizing primitive. That collapsed
 
 The fix is to keep plugin as the distribution axis (unchanged) and add **stage** as an orthogonal classification on every resource. The compiler then materializes a `plugin × stage` matrix at resolve time. Selection happens along the plugin axis; runtime retrieval happens along the stage axis; coverage audit happens by inspecting columns.
 
+## Plugin Ownership Invariant
+
+Stage tagging never moves a resource out of its plugin. A skill that ships in
+`plugins/github/skills/gh-fix-ci/SKILL.md` remains a GitHub plugin resource;
+tagging it as `[verify, implement]` only places pointers to that same resource
+in the `verify` and `implement` stage indexes.
+
+This invariant is load-bearing:
+
+- Plugins are the unit of distribution, installation, versioning, and vendor
+  ownership.
+- Stages are a retrieval and coverage lens, not a packaging format.
+- The compiler may emit `stages/<stage>/index.md`, but those files contain
+  relative links back to the owning plugin's projected resource path.
+- Current standalone skill snapshots are still plugin rows when wrapped by
+  harness-kit containers such as `codex-system-skills` and
+  `codex-user-skills`; individual skills are not split into new stage plugins
+  during this pass.
+
 ## Stage Vocabulary (closed)
 
 Nine stages. The set is fixed; plugin authors choose from this list and may not invent new names.
@@ -30,8 +49,8 @@ Nine stages. The set is fixed; plugin authors choose from this list and may not 
 |---|---|---|
 | `freestyle` | No process gate. Ad-hoc edits, REPL exploration, single-file patches, conversational coding. | Lightweight skills, MCP servers, reference snippets. Default for resources that do not declare a stage. |
 | `intent` | Capture and clarify what the user wants before any artifact exists. | `brainstorming` skill; oracle-style subagents. |
-| `plan` | Decompose intent into ordered, checkable steps. | `writing-plans` skill; `plan-required` hook; planning workflow. |
 | `spec` | Author formal design documents that an implementation plan can reference. | `spec-first-planning` skill; spec doc templates. |
+| `plan` | Decompose intent into ordered, checkable steps. | `writing-plans` skill; `plan-required` hook; planning workflow. |
 | `explore` | Read existing code, find callsites, confirm invariants without writing. | `explore` subagent; `lsp` / `search` MCP surfaces; reference docs. |
 | `implement` | Edit source files to make the planned change real, including test code written alongside. | `test-driven-development`, `backend-change`, `frontend-implementation` skills; `oracle`, `codex-rescue` subagents. |
 | `verify` | Execute tests, typecheck, lint, E2E, manual smoke; produce evidence the change works. | `verification-before-completion` skill; `tests-must-pass` hook; `systematic-debugging` skill. |
@@ -41,7 +60,7 @@ Nine stages. The set is fixed; plugin authors choose from this list and may not 
 Properties of the vocabulary:
 
 - **Closed.** Compiler ships `STAGES` as a TypeScript `const` array. zod uses `z.enum(STAGES)`. Unknown stage strings in frontmatter fail validation with the offending file path in the message.
-- **Set, not sequence.** Stages have no canonical order. `verify` may fire repeatedly inside `implement`; `explore` may run at any point; `plan` and `spec` order is project-dependent.
+- **Set, not sequence.** Stages have no canonical order. `verify` may fire repeatedly inside `implement`; `explore` may run at any point; `plan` and `spec` order is project-dependent. The display order above follows the common doc-first flow (`intent -> spec -> plan`) but does not enforce timeline.
 - **Default value.** A resource that omits `stage` in its frontmatter defaults to `[freestyle]`. This lets unmodified plugin sources keep compiling while migration progresses.
 
 ## Required vs Optional Stages
@@ -56,7 +75,8 @@ optional = [freestyle, spec, explore, review]
 Coverage is enforced by the compiler at warn level only:
 
 - A required stage with zero resources across all enabled plugins emits a build-time warning naming the missing stage.
-- `extras.{skills,agents,hooks,workflows,mcp}` entries can satisfy coverage even if the underlying plugin is not fully enabled.
+- `extras.{skills,agents,hooks,workflows}` entries can satisfy coverage even if the underlying plugin is not fully enabled.
+- MCP resources are stage-indexed for retrieval but never satisfy coverage by themselves.
 - An optional stage with zero resources is silent.
 
 Reasoning for the split:
@@ -68,9 +88,16 @@ Reasoning for the split:
 
 Warnings, not errors: the user may consciously omit a stage (e.g. solo experimentation), and the harness should still build.
 
+Coverage is **resource-presence coverage**, not a proof of process quality. A
+stage is "covered" when at least one coverage-eligible resource exists in that
+column. It does not mean the preset has the best possible workflow, a complete
+policy set, or project-specific review depth.
+
 ## Resource → Stage Assignment
 
-Every resource a plugin ships declares its stage(s) in its source frontmatter / config.
+Every stage-indexed resource a plugin ships declares its stage(s) in its source
+frontmatter / config. The declaration lives with the resource in the owning
+plugin; resources are not copied or regrouped by stage in source.
 
 **Skills.** Extend `SKILL.md` frontmatter with `stage`:
 
@@ -96,9 +123,23 @@ stage: [plan]
 ---
 ```
 
-**Subagents.** `plugins/<id>/agents/<name>.md` gains the same frontmatter shape. Subagent invocations are stage-scoped: `stages/explore/` listing the `explore` subagent helps the LLM frontend recommend "you have no `explore` cell — add an `explore` plugin or accept the gap".
+**Skill-local agents.** Many copied Codex skills carry
+`skills/<skill>/agents/openai.yaml`. These files are companion metadata for the
+parent skill, not independent plugin resources. They inherit the parent
+`SKILL.md` stage list, are emitted with the skill where the target platform
+needs them, and do not count as separate coverage cells.
 
-**MCP servers.** `plugins/<id>/mcp/<name>.json` gains `stage` at the config root.
+**Top-level subagents.** `plugins/<id>/agents/<name>.md` gains the same
+frontmatter shape as workflows. Top-level subagent invocations are
+stage-scoped: `stages/explore/` listing the `explore` subagent helps the LLM
+frontend recommend "you have no `explore` cell — add an `explore` plugin or
+accept the gap".
+
+**MCP servers.** `plugins/<id>/mcp/<name>.json` gains `stage` at the config
+root. MCP servers are persistent runtime capabilities, so `stage` is used only
+for discovery in `stages/<stage>/index.md`; MCP cells do not satisfy coverage.
+Upstream plugin metadata such as a root `.mcp.json` remains passive unless the
+plugin also mirrors it into `mcp/<name>.json` for harness-kit compilation.
 
 **Docs / rules / context / references.** These are passive (always-on), not stage-gated. They do not carry a `stage` field and do not appear in the matrix. They are emitted along their existing paths (`AGENTS.md`, `ARCHITECTURE.md`, `docs/references/*`) and consumed via the project's standing system prompt, not via stage retrieval.
 
@@ -120,7 +161,7 @@ type Matrix = {
   plugins: string[];                                          // enabled plugin ids in deterministic order
   stages: readonly Stage[];                                   // imported from src/stages.ts
   cells: Record<string, Record<Stage, Cell[]>>;               // cells[pluginId][stage] = resources
-  coverage: Record<Stage, { plugins: string[]; ok: boolean }>;
+  coverage: Record<Stage, { plugins: string[]; ok: boolean; required: boolean }>;
 };
 ```
 
@@ -129,7 +170,7 @@ Construction rules:
 1. Start with empty matrix; `plugins` = preset expansion ∪ `extras.plugins`.
 2. For each enabled plugin: walk its sub-directories, read frontmatter, place each resource into `cells[plugin][stage]` for every stage it declares.
 3. For each `extras.{skills,agents,hooks,workflows,mcp}: ["<plugin>:<name>"]` entry: load the single source file and add to its cell *without* enabling the rest of the plugin.
-4. After fill, compute `coverage` by scanning each stage's column.
+4. After fill, compute `coverage` by scanning each stage's column and counting only coverage-eligible cells (`skill`, `hook`, `workflow`, top-level `agent`; not `mcp` and not skill-local agent metadata).
 
 The matrix is the **single source of truth** for downstream phases. `render()` and `emit()` consume the matrix; they do not re-traverse plugin source directories.
 
@@ -166,8 +207,8 @@ A `stages/` directory whose entries are *not copies* but pointers. Lets an in-se
 .harness/stages/
 ├── freestyle/index.md
 ├── intent/index.md
-├── plan/index.md
 ├── spec/index.md
+├── plan/index.md
 ├── explore/index.md
 ├── implement/index.md
 ├── verify/index.md
@@ -205,10 +246,11 @@ The matrix itself, serialized. Consumers: the (post-v0) LLM frontend, coverage t
 {
   "version": 1,
   "plugins": ["superpowers", "planning", "delivery", "nextjs"],
-  "stages": ["freestyle","intent","plan","spec","explore","implement","verify","review","deliver"],
+  "stages": ["freestyle","intent","spec","plan","explore","implement","verify","review","deliver"],
   "cells": {
     "superpowers": {
       "intent":    [{"kind":"skill","name":"brainstorming","path":"skills/superpowers-brainstorming/SKILL.md"}],
+      "spec":      [{"kind":"skill","name":"spec-first-planning","path":"skills/superpowers-spec-first-planning/SKILL.md"}],
       "plan":      [{"kind":"skill","name":"writing-plans","path":"skills/superpowers-writing-plans/SKILL.md"}],
       "implement": [{"kind":"skill","name":"test-driven-development","path":"skills/superpowers-tdd/SKILL.md"}]
     },
@@ -219,8 +261,8 @@ The matrix itself, serialized. Consumers: the (post-v0) LLM frontend, coverage t
   "coverage": {
     "freestyle": {"plugins": [],            "ok": true,  "required": false},
     "intent":    {"plugins": ["superpowers"], "ok": true,  "required": true},
-    "plan":      {"plugins": ["superpowers","planning"], "ok": true, "required": true},
     "spec":      {"plugins": [],            "ok": false, "required": false},
+    "plan":      {"plugins": ["superpowers","planning"], "ok": true, "required": true},
     "explore":   {"plugins": [],            "ok": false, "required": false},
     "implement": {"plugins": ["superpowers","nextjs"], "ok": true, "required": true},
     "verify":    {"plugins": ["superpowers"], "ok": true,  "required": true},
@@ -231,7 +273,7 @@ The matrix itself, serialized. Consumers: the (post-v0) LLM frontend, coverage t
 }
 ```
 
-`warnings` collects any required-stage coverage gaps in human-readable form. CI can `jq '.warnings | length == 0'`.
+`warnings` collects any required-stage coverage gaps in human-readable form, computed from coverage-eligible cells only. CI can `jq '.warnings | length == 0'`.
 
 ## Plugin Sub-Directory Layout (extension)
 
@@ -241,6 +283,7 @@ The `2026-05-25-harness-yaml-schema-design.md` plugin layout is broadened from 5
 plugins/<plugin>/
   README.md                                       # required, not emitted
   skills/<name>/SKILL.md                          # 0..N
+  skills/<name>/agents/openai.yaml                 # 0..N skill-local metadata, inherits parent skill stage
   agents/<name>.md                                # 0..N
   hooks/<name>.json                               # 0..N
   docs/<name>/{manifest.ts, template.md}          # 0..N (rendered, passive)
@@ -249,7 +292,7 @@ plugins/<plugin>/
   **mcp/<name>.json**                             # 0..N
 ```
 
-`workflows/` and `mcp/` are added because real lifecycle coverage requires them: the dify example today places `workflows/` and `mcp/` at the top of its hand-written `.harness/` because plugin sources have nowhere to put them. After this extension, those resources have a source home.
+`workflows/` and `mcp/` are added because real lifecycle retrieval requires them: the dify example today places `workflows/` and `mcp/` at the top of its hand-written `.harness/` because plugin sources have nowhere to put them. After this extension, those resources have a source home.
 
 Migration impact on existing plugins: zero. No current plugin ships `workflows/` or `mcp/`; they are purely additive.
 
@@ -267,6 +310,23 @@ Restated in matrix terms for clarity:
 
 `extras.workflows` and `extras.mcp` are new namespaces under `extras:` — additive to the yaml schema in `2026-05-25-harness-yaml-schema-design.md` and follow the same `<plugin>:<name>` addressing rule.
 
+## Current Inventory Pass
+
+The current migration pass covers every `SKILL.md` under `plugins/`, excluding
+vendored payloads such as `node_modules/` and app bundle internals. As of this
+spec revision, that inventory contains:
+
+- 83 skills across 16 plugin rows.
+- 39 skill-local `agents/openai.yaml` files, all inheriting parent skill stages.
+- 0 top-level `plugins/<id>/hooks/` resources.
+- 0 top-level `plugins/<id>/agents/<name>.md` resources.
+- 1 root `plugins/computer-use/.mcp.json` copied from the upstream Codex plugin,
+  to be mirrored into `plugins/computer-use/mcp/computer-use.json` for
+  harness-kit stage indexing while preserving the upstream file.
+
+The full assignment table lives in the implementation plan for this spec and
+is expected to be reflected into `plugins/INDEX.md` during execution.
+
 ## Migration
 
 Existing plugin source files have no `stage` frontmatter. Behavior:
@@ -274,9 +334,12 @@ Existing plugin source files have no `stage` frontmatter. Behavior:
 1. Compiler defaults missing `stage` to `[freestyle]`.
 2. All existing skills accordingly land in the `freestyle` column at first compile.
 3. Coverage check warns that `intent`, `plan`, `implement`, `verify`, `deliver` are uncovered.
-4. A documentation-only sweep (see plan) adds explicit `stage` to every existing SKILL.md.
+4. A metadata sweep (see plan) adds explicit `stage` to every current `SKILL.md`, records skill-local agent inheritance, mirrors any stage-indexed MCP config into `mcp/<name>.json`, and records the resulting plugin × stage table.
 
-Acceptance for migration: after the sweep, the `nextjs` preset's `manifest.json` `coverage` field has `ok: true` for all 5 required stages with no `warnings`.
+Acceptance for migration: after the sweep, every current skill has an explicit
+stage list from the closed vocabulary; skill-local agents inherit their parent
+skill stages; MCP resources are indexed but excluded from coverage; and the
+current full-inventory matrix covers all 5 required stages.
 
 ## Non-Goals (this revision)
 
@@ -284,12 +347,12 @@ Acceptance for migration: after the sweep, the `nextjs` preset's `manifest.json`
 - **No stage hierarchy.** Stages are flat. No `implement.frontend` nested form.
 - **No per-project stage override.** Yaml does not allow re-tagging a third-party skill's stage.
 - **No required hook list.** Coverage is per stage at the resource-count level; we do not require specific hook kinds per stage.
+- **No skill extraction from plugins.** Stage tagging never moves a skill out of its owning plugin or creates stage-owned plugin bundles.
 - **No timeline / ordering enforcement.** Stages are a set; `plan` happening after `implement` is allowed.
 - **No registry-level stage policy.** Plugin authors choose stages freely from the closed set; harness-kit does not curate.
 
 ## Open Questions
 
 - **Should `freestyle` resources also appear in `stages/<other>/index.md`?** Argument for: a freestyle skill might be useful mid-implement. Argument against: it dilutes per-stage retrieval. *Initial position: freestyle appears only in `stages/freestyle/index.md` plus the global SKILLS.md.*
-- **MCP servers and "stage" semantics.** An MCP server is persistent, not stage-bound. Is `stage` on MCP useful, or should MCP skip the matrix and live as a flat resource only? *Initial position: keep `stage` on MCP for stage-index retrieval, but never use MCP for coverage counting.*
 - **Coverage warnings — soft or strict mode?** Should `harness-kit compile --strict` (post-v0) promote coverage warnings to errors? *Initial position: yes, behind an opt-in flag.*
 - **Permissions per stage.** A delivery-time permission ("allow `gh pr create`") is different from an implement-time permission ("allow `npm install`"). Worth splitting? *Initial position: no, permissions stay aggregated; revisit when a real conflict appears.*
