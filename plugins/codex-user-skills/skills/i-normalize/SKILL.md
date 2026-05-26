@@ -2,6 +2,7 @@
 name: i-normalize
 description: Normalize design to match your design system and ensure consistency
 argument-hint: [FEATURE=<value>]
+stage: [implement, review]
 ---
 
 Analyze and redesign the feature to perfectly match our design system standards, aesthetics, and established patterns.

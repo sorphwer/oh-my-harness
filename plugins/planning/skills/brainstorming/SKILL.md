@@ -1,6 +1,7 @@
 ---
 name: brainstorming
 description: Use before creating a feature, building a component, adding functionality, or modifying behavior - explores user intent, requirements, and design tradeoffs before any code or plan is written.
+stage: [intent]
 ---
 
 # Brainstorming

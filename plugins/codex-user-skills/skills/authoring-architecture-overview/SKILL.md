@@ -1,6 +1,7 @@
 ---
 name: authoring-architecture-overview
 description: Use when the user asks for a single-page HTML architecture overview or system diagram of a codebase — phrases like "architecture_overview.html", "画个系统总览图", "给这个项目做个架构图", "make an architecture diagram", or "overview HTML". Triggers on requests for a standalone browser-openable diagram (no Mermaid server, no build step).
+stage: [explore, deliver]
 ---
 
 # Authoring Architecture Overview HTML

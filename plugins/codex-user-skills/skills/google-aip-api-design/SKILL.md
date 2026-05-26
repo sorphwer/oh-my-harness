@@ -1,6 +1,7 @@
 ---
 name: google-aip-api-design
 description: Design, review, and refactor backend APIs to follow Google API Improvement Proposals (google.aip.dev). Use when creating or updating REST, gRPC, protobuf, or OpenAPI APIs; modeling resources and resource names; choosing standard CRUD versus custom methods; defining pagination, filtering, field masks, etags, request IDs, and error semantics; or checking whether an API contract conforms to Google AIP.
+stage: [spec, implement, review]
 ---
 
 # Google AIP API Design

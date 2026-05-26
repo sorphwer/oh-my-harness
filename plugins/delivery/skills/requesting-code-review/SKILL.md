@@ -1,6 +1,7 @@
 ---
 name: requesting-code-review
 description: Use when completing a task, finishing a major feature, or before merging - sets up an independent review that can catch issues self-review will miss.
+stage: [review]
 ---
 
 # Requesting Code Review

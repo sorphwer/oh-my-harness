@@ -3,6 +3,7 @@ name: attack-path-analysis
 description: Use when Codex is already in the attack-path-analysis phase of a security scan or the user explicitly asks to trace a security finding from source to sink and calibrate severity. Do not use as the primary trigger for full PR, commit, branch, patch, or repository scans.
 metadata:
   short-description: Analyze attack paths and severity
+stage: [review]
 ---
 
 # Security Attack Path Analysis

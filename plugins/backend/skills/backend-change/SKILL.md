@@ -1,6 +1,7 @@
 ---
 name: backend-change
 description: Use when implementing or reviewing server-side application behavior, background jobs, service integrations, authorization, validation, or business logic.
+stage: [implement]
 ---
 
 # Backend Change

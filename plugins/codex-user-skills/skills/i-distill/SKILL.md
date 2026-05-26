@@ -2,6 +2,7 @@
 name: i-distill
 description: Strip designs to their essence by removing unnecessary complexity. Great design is simple, powerful, and clean.
 argument-hint: [TARGET=<value>]
+stage: [implement]
 ---
 
 Remove unnecessary complexity from designs, revealing the essential elements and creating clarity through ruthless simplification.

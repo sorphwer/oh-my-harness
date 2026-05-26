@@ -3,6 +3,7 @@ name: security-scan
 description: "Use when the user asks for a full security scan or security code review of a pull request, commit, branch, patch, working-tree diff, or repository. Run distinct phases: threat modeling, finding discovery, validation, attack-path analysis, and final markdown output."
 metadata:
   short-description: Run security scan
+stage: [spec, explore, verify, review]
 ---
 
 # Security Scan

@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: Use when reviewing a pull request, branch, commit, patch, or working-tree diff for bugs, regressions, missing tests, maintainability risks, or security issues.
+stage: [review]
 ---
 
 # Code Review

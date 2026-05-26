@@ -1,6 +1,7 @@
 ---
 name: frontend-implementation
 description: Use when building or changing a user-facing web page, component, dashboard, tool, form, or interactive application.
+stage: [implement]
 ---
 
 # Frontend Implementation

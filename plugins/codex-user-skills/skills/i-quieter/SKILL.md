@@ -2,6 +2,7 @@
 name: i-quieter
 description: Tone down overly bold or visually aggressive designs. Reduces intensity while maintaining design quality and impact.
 argument-hint: [TARGET=<value>]
+stage: [implement]
 ---
 
 Reduce visual intensity in designs that are too bold, aggressive, or overstimulating, creating a more refined and approachable aesthetic without losing effectiveness.

@@ -1,6 +1,7 @@
 ---
 name: accessibility-audit
 description: Use when reviewing or hardening a web interface for keyboard use, focus management, semantic structure, contrast, labels, reduced motion, and assistive technology behavior.
+stage: [verify]
 ---
 
 # Accessibility Audit

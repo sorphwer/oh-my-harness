@@ -1,6 +1,7 @@
 ---
 name: "Spreadsheets"
 description: "Use this skill when a user requests to create, modify, analyze, visualize, or work with spreadsheet files (`.xlsx`, `.xls`, `.csv`, `.tsv`) or Google Sheets-targeted spreadsheet artifacts with formulas, formatting, charts, tables, and recalculation."
+stage: [implement, verify, deliver]
 ---
 
 # Spreadsheets skill

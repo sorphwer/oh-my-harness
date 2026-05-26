@@ -2,6 +2,7 @@
 name: i-animate
 description: Review a feature and enhance it with purposeful animations, micro-interactions, and motion effects that improve usability and delight.
 argument-hint: [TARGET=<value>]
+stage: [implement]
 ---
 
 Analyze a feature and strategically add animations and micro-interactions that enhance understanding, provide feedback, and create delight.

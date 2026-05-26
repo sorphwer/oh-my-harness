@@ -1,6 +1,7 @@
 ---
 name: frontend-polish
 description: Use when doing a final quality pass on an existing frontend to improve spacing, hierarchy, alignment, color, motion, responsiveness, and visual consistency.
+stage: [implement]
 ---
 
 # Frontend Polish

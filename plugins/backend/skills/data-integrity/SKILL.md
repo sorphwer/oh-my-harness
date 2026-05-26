@@ -1,6 +1,7 @@
 ---
 name: data-integrity
 description: Use when changing database schemas, migrations, persistence rules, lifecycle transitions, uniqueness constraints, transactions, or concurrency-sensitive behavior.
+stage: [implement, verify]
 ---
 
 # Data Integrity

@@ -1,6 +1,7 @@
 ---
 name: computer-use
 description: Control local Mac apps through Computer Use. Use for tasks that require reading or operating app UI by clicking, typing, scrolling, dragging, pressing keys, or setting values.
+stage: [explore, implement, verify]
 ---
 
 # Computer Use

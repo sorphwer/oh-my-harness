@@ -1,6 +1,7 @@
 ---
 name: github
 description: Triage and orient GitHub repository, pull request, and issue work through the connected GitHub app. Use when the user asks for general GitHub help, wants PR or issue summaries, or needs repository context before choosing a more specific GitHub workflow.
+stage: [explore, review]
 ---
 
 # GitHub

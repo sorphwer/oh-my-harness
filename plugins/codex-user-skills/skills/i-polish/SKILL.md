@@ -2,6 +2,7 @@
 name: i-polish
 description: Final quality pass before shipping. Fixes alignment, spacing, consistency, and detail issues that separate good from great.
 argument-hint: [TARGET=<value>]
+stage: [implement, verify]
 ---
 
 **First**: Use the i-frontend-design skill for design principles and anti-patterns.
