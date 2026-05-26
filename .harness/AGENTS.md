@@ -70,15 +70,22 @@ Content directories (current):
 
 ## Planning Document Convention
 
-Canonical planning docs for this repo now live under `.harness/docs/superpowers/`:
+Canonical planning docs for this repo live under `.harness/docs/superpowers/`:
 
 - design specs: `.harness/docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 - implementation plans: `.harness/docs/superpowers/plans/YYYY-MM-DD-<topic>.md`
 
+**Spec and plan are not interchangeable.** A spec defines the contract (what we are building and why); a plan executes against it (which files change, in what order). Mixing them is a process bug. Full convention, required shape, and lifecycle:
+
+- [`.harness/docs/superpowers/README.md`](docs/superpowers/README.md)
+
 Current MVP docs:
 
-- Spec: `.harness/docs/superpowers/specs/2026-05-25-mvp-development-design.md`
-- Plan: `.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md`
+- Spec: [`.harness/docs/superpowers/specs/2026-05-25-mvp-development-design.md`](docs/superpowers/specs/2026-05-25-mvp-development-design.md)
+- Plan: [`.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md`](docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md) — **SUPERSEDED**
+- Schema spec: [`.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`](docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md)
+- Matrix spec: [`.harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`](docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md)
+- Matrix plan: [`.harness/docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md`](docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md)
 
 Root `CLAUDE.md`, `AGENTS.md`, and `README.md` are lightweight entry points. Keep repo-specific process rules in `.harness/` so there is one canonical location.
 
