@@ -2,6 +2,12 @@
 
 Date: 2026-05-25
 Status: draft, pending user review
+
+> **Extended by the plugin-stage matrix spec (2026-05-26).** Plugin resources
+> carry closed lifecycle-stage metadata. Plugin source layout now also accepts
+> `workflows/<name>.md` and `mcp/<name>.json`; `extras` accepts `workflows`
+> and `mcp` selectors. The yaml selection model remains plugin-owned.
+
 Supersedes: the "Yaml Schema (v0)" section of `2026-05-25-mvp-development-design.md` (the rest of that spec — pipeline, test strategy, dependencies, acceptance criterion — still stands)
 
 ## Goal
@@ -26,7 +32,7 @@ Consequences:
 
 Two kinds of compile-time inputs:
 
-1. **Plugins** — self-contained bundles. Each plugin can contribute any combination of skills, agents, hooks, docs, and a permissions block. The plugin is the unit the yaml lists (via `preset` or `extras.plugins`) and the unit the LLM frontend picks from (via `plugins/*/README.md`).
+1. **Plugins** — self-contained bundles. Each plugin can contribute any combination of skills, agents, hooks, workflows, MCP resources, docs, and a permissions block. The plugin is the unit the yaml lists (via `preset` or `extras.plugins`) and the unit the LLM frontend picks from (via `plugins/*/README.md`).
 2. **References** — free-form per-project files (LLM-readable). Either pool ids from `references-pool/` or filesystem paths supplied by the user in `harness.yaml`.
 
 ### Plugin directory layout
@@ -37,6 +43,8 @@ plugins/<plugin>/
   skills/<name>/SKILL.md                   # optional, 0..N  (frontmatter `name` + `description`; body is the skill instructions)
   agents/<name>.md                         # optional, 0..N
   hooks/<name>.json                        # optional, 0..N
+  workflows/<name>.md                      # optional, 0..N
+  mcp/<name>.json                          # optional, 0..N
   docs/<name>/{manifest.ts, template.md}   # optional, 0..N
   permissions.json                         # optional, 0..1
 ```
@@ -56,6 +64,8 @@ Every subdirectory and every file is optional except `README.md`. The shape of a
 | `skills/<name>/SKILL.md` | aggregated across all enabled plugins into `<outDir>/SKILLS.md` (frontmatter supplies name + description; body is the skill instructions) |
 | `agents/<name>.md` | copied to `<outDir>/.claude/agents/<name>.md` |
 | `hooks/<name>.json` | merged across all enabled plugins into `<outDir>/.claude/settings.example.json`'s `hooks` block |
+| `workflows/<name>.md` | copied to `<outDir>/workflows/<plugin>-<name>.md` |
+| `mcp/<name>.json` | merged across all enabled plugins into `<outDir>/mcp/config.json` |
 | `docs/<name>/{manifest.ts, template.md}` | eta-rendered with yaml params, written to `<outDir>/<manifest.outputPath>` |
 | `permissions.json` | merged across all enabled plugins into `<outDir>/.claude/settings.example.json`'s `permissions` block |
 
@@ -155,11 +165,13 @@ extras:                       # optional: anything beyond what the preset alread
   skills:  [other-plugin:special-skill]   # individual skills, addressed as <plugin>:<name>
   agents:  [my-plugin:domain-reviewer]    # individual agents
   hooks:   [my-plugin:prevent-secrets-commit]  # individual hooks
+  workflows: [my-plugin:release]           # individual workflows
+  mcp: [my-plugin:browser]                 # individual MCP configs
 ```
 
 When no extras are needed, the entire `extras:` block is omitted.
 
-Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/skills/<name>/SKILL.md`, `plugins/<plugin>/agents/<name>.md`, or `plugins/<plugin>/hooks/<name>.json` respectively. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
+Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`, `extras.workflows`, `extras.mcp`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/skills/<name>/SKILL.md`, `plugins/<plugin>/agents/<name>.md`, `plugins/<plugin>/hooks/<name>.json`, `plugins/<plugin>/workflows/<name>.md`, or `plugins/<plugin>/mcp/<name>.json` respectively. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
 
 ## Zod Schema (v1)
 
@@ -172,6 +184,8 @@ const Extras = z.object({
   skills:  z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
   agents:  z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
   hooks:   z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
+  workflows: z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
+  mcp:       z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
 }).partial();
 
 export const HarnessYaml = z.object({
@@ -213,9 +227,9 @@ load   ─► parse + zod-validate yaml
         │
 resolve ─► expand preset → plugin id list
         │  merge extras.plugins into the plugin set
-        │  for each enabled plugin, walk plugins/<id>/{skills,agents,hooks,docs,permissions.json}
+        │  for each enabled plugin, walk plugins/<id>/{skills,agents,hooks,workflows,mcp,docs,permissions.json}
         │    and add every present resource to the appropriate bucket
-        │  for each extras.{skills,agents,hooks} entry, parse "<plugin>:<name>",
+        │  for each extras.{skills,agents,hooks,workflows,mcp} entry, parse "<plugin>:<name>",
         │    load the single file, and add it to its bucket
         │  resolve each reference (pool id or path)
         │  fail loud on unknown plugin id, unknown <plugin>:<name>, unknown reference
@@ -223,10 +237,12 @@ resolve ─► expand preset → plugin id list
 render  ─► eta-render each doc with stack/contract/derived params
         │  aggregate skills (across all enabled plugins + extras.skills) → SKILLS.md
         │  copy each agent file verbatim
+        │  copy workflow files with plugin-prefixed names
         │  compose .claude/settings.example.json from:
         │    enabled plugin id list +
         │    merged permissions blocks (one per plugin that ships permissions.json) +
         │    merged hooks blocks
+        │  merge MCP configs into mcp/config.json
         │  pass-through references as raw bytes
         │
 emit    ─► write file map to outDir; never delete unrelated files
@@ -243,6 +259,8 @@ Output map:
 | `plugins/<plugin>/docs/<name>/template.md` (rendered) | `<outDir>/<manifest.outputPath>` |
 | aggregated `plugins/<plugin>/skills/*/SKILL.md` | `<outDir>/SKILLS.md` |
 | `plugins/<plugin>/agents/<name>.md` | `<outDir>/.claude/agents/<name>.md` |
+| `plugins/<plugin>/workflows/<name>.md` | `<outDir>/workflows/<plugin>-<name>.md` |
+| merged plugin MCP configs | `<outDir>/mcp/config.json` |
 | merged plugin permissions + plugin id list + merged hooks | `<outDir>/.claude/settings.example.json` |
 | `references-pool/<id>.<ext>` or user path | `<outDir>/docs/references/<basename>` |
 

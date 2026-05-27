@@ -2,7 +2,7 @@
 
 ## System Overview
 
-harness-kit is a local compiler and content system for project process docs. A user writes or generates `harness.yaml`; the compiler resolves local **plugins** (self-contained bundles that may ship skills / agents / hooks / docs / a permissions block) plus per-project references; then it emits a deterministic `.harness/` folder into the target project.
+harness-kit is a local compiler and content system for project process docs. A user writes or generates `harness.yaml`; the compiler resolves local **plugins** (self-contained bundles that may ship skills / agents / hooks / workflows / MCP resources / docs / a permissions block) plus per-project references; then it emits a deterministic `.harness/` folder into the target project.
 
 ## High-Level Architecture
 
@@ -21,16 +21,19 @@ Natural language intent
  | resolve                                         |
  |   preset -> plugin id list                      |
  |   merge extras.plugins                          |
- |   walk plugins/<id>/{skills,agents,hooks,docs,  |
- |     permissions.json} for every enabled plugin  |
- |   resolve extras.{skills,agents,hooks} (each    |
+ |   walk plugins/<id>/{skills,agents,hooks,       |
+ |     workflows,mcp,docs,permissions.json}        |
+ |     for every enabled plugin                    |
+ |   resolve extras.{skills,agents,hooks,          |
+ |     workflows,mcp} (each                        |
  |     entry is "<plugin>:<name>")                 |
  |   resolve references (pool id or path)          |
  | render                                          |
  |   eta-render docs with stack/contract params    |
  |   aggregate skills -> SKILLS.md                 |
- |   copy agents; merge permissions + hooks +      |
- |     plugin list into settings.example.json      |
+ |   copy agents + workflows; merge MCP configs    |
+ |   merge permissions + hooks + plugin list into  |
+ |     settings.example.json                       |
  | emit                                            |
  |   write file map; never delete unrelated files  |
  +-------------------------------------------------+
@@ -40,7 +43,7 @@ Natural language intent
 
 Local content directories:
 
-plugins/<id>/      -> self-contained bundles (any of: README.md, skills/, agents/, hooks/, docs/, permissions.json)
+plugins/<id>/      -> self-contained bundles (any of: README.md, skills/, agents/, hooks/, workflows/, mcp/, docs/, permissions.json)
 plugins/INDEX.md   -> browsable inventory of copied current Codex plugins + standalone skills
 references-pool/   -> shared raw LLM-readable reference files
 presets/<name>.ts  -> named plugin id lists (post-v0; hardcoded in compiler for v0)
@@ -52,13 +55,19 @@ presets/<name>.ts  -> named plugin id lists (post-v0; hardcoded in compiler for 
 User or LLM writes harness.yaml
   -> load: read yaml, parse, validate with zod
   -> resolve: expand preset to plugin id list, walk each plugin for its
-              sub-resources, resolve references
-  -> render: eta-render docs, aggregate skills, merge permissions + hooks,
-             compose settings.json
+              sub-resources, resolve extras and references
+  -> render: eta-render docs, aggregate skills, copy agents + workflows,
+             merge MCP configs, merge permissions + hooks, compose settings.json
   -> emit: write files under outDir without deleting unrelated files
 ```
 
 The first implementation target is `example/nextjs-acme/harness.yaml -> example/nextjs-acme/.harness/` using a subset rule: the compiler only has to byte-match the files it emits, while the hand-filled demo may contain additional docs not yet produced by v0.
+
+## Matrix IR
+
+After resolve, the compiler holds a sparse plugin x stage matrix. Plugins are the unit of distribution; stages are the unit of lifecycle retrieval and coverage. Render and emit consume the matrix instead of walking plugin source directories again.
+
+The closed stage vocabulary lives in `src/stages.ts`. Required-stage coverage warnings apply to `intent`, `plan`, `implement`, `verify`, and `deliver`; MCP is indexed for retrieval but is not coverage-eligible. The full model is in [`.harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`](docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md).
 
 ## Core Entities
 
@@ -66,7 +75,7 @@ The first implementation target is `example/nextjs-acme/harness.yaml -> example/
 
 - file: `harness.yaml`
 - role: source of truth for one generated harness
-- contains: `preset`, project identity (`name` / `displayName` / `overview`), `stack`, `contract`, `references`, and optional `extras: { plugins, skills, agents, hooks }`
+- contains: `preset`, project identity (`name` / `displayName` / `overview`), `stack`, `contract`, `references`, and optional `extras: { plugins, skills, agents, hooks, workflows, mcp }`
 - schema source of truth: [`docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`](docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md)
 - ownership: user-authored or LLM-authored, but always compiled by deterministic code
 
@@ -87,10 +96,14 @@ The single unit of reusable content. A plugin is a directory under `plugins/<id>
 | `skills/<name>/SKILL.md` | optional, 0..N | one entry in the rendered `SKILLS.md` (frontmatter `name` + `description` + body) |
 | `agents/<name>.md` | optional, 0..N | one file at `.harness/.claude/agents/<name>.md` |
 | `hooks/<name>.json` | optional, 0..N | one entry merged into `.harness/.claude/settings.example.json`'s `hooks` block |
+| `workflows/<name>.md` | optional, 0..N | one file at `.harness/workflows/<plugin>-<name>.md` |
+| `mcp/<name>.json` | optional, 0..N | one config merged into `.harness/mcp/config.json` |
 | `docs/<name>/{manifest.ts, template.md}` | optional, 0..N | one rendered file at the path the manifest declares |
 | `permissions.json` | optional, 0..1 | merged into the `permissions` block of `.harness/.claude/settings.example.json` |
 
-A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. This repo also contains copied Codex plugin bundles whose original metadata is preserved under `.codex-plugin/plugin.json`; standalone active Codex skills are grouped into harness-local container plugins so the compiler can address them through the same `plugins/<id>/skills/<name>/SKILL.md` layout. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks}` using `<plugin>:<name>` ids without enabling the whole plugin.
+Every skill, hook, workflow, top-level agent, and MCP resource declares stage metadata; skill-local `agents/openai.yaml` inherits its parent skill stage.
+
+A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. This repo also contains copied Codex plugin bundles whose original metadata is preserved under `.codex-plugin/plugin.json`; standalone active Codex skills are grouped into harness-local container plugins so the compiler can address them through the same `plugins/<id>/skills/<name>/SKILL.md` layout. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks,workflows,mcp}` using `<plugin>:<name>` ids without enabling the whole plugin.
 
 ### Reference File
 

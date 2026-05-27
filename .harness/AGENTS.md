@@ -61,6 +61,8 @@ Content directories (current):
   - `skills/<name>/SKILL.md` - frontmatter (`name`, `description`) + body; aggregated into `SKILLS.md`
   - `agents/<name>.md` - copied to `.claude/agents/<name>.md`
   - `hooks/<name>.json` - merged into `.claude/settings.example.json`'s `hooks` block
+  - `workflows/<name>.md` - copied to `.harness/workflows/<plugin>-<name>.md`
+  - `mcp/<name>.json` - merged into `.harness/mcp/config.json`; stage-indexed for retrieval but not coverage-eligible
   - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
   - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
 
@@ -250,6 +252,12 @@ If the incoming task contains any Zero-Pause trigger phrase, the agent MUST
 operate under full Zero-Pause Continuous Execution Mode from the first token.
 No separate confirmation is required or allowed.
 
+## Stage Tagging
+
+Every stage-indexed plugin resource declares one or more lifecycle stages from `src/stages.ts`. Skills declare stages in `SKILL.md` frontmatter. Hooks and MCP resources use top-level JSON fields; workflows and top-level agents use frontmatter. Skill-local `agents/openai.yaml` files inherit their parent skill stage. MCP resources are stage-indexed for retrieval but do not satisfy coverage.
+
+Skills must remain under their owning plugin. Stages are retrieval and coverage metadata, not packaging boundaries.
+
 ## Security Requirements
 
 - No secrets or API keys in sample harnesses, fixtures, references, or generated output.
@@ -290,6 +298,7 @@ Planned repo implementation structure:
 ```text
 src/
   compile.ts
+  stages.ts
 docs-pool/
 catalog/
 references-pool/
