@@ -3,7 +3,9 @@
 Date: 2026-05-25
 Status: draft, pending user review
 
-> **Extended by the plugin-stage matrix spec (2026-05-26).** Plugin resources
+> **Extended by the
+> [`plugin-stage matrix spec`](2026-05-26-plugin-stage-matrix-design.md)
+> (2026-05-26).** Plugin resources
 > carry closed lifecycle-stage metadata. Plugin source layout now also accepts
 > `workflows/<name>.md` and `mcp/<name>.json`; `extras` accepts `workflows`
 > and `mcp` selectors. The yaml selection model remains plugin-owned.
@@ -15,7 +17,7 @@ Supersedes: the "Yaml Schema (v0)" section of `2026-05-25-mvp-development-design
 Define the long-lived shape of `harness.yaml` so that:
 
 - yaml only carries what's project-specific. Defaults that ship with harness-kit do not appear as `values`.
-- Reusable capabilities are organized as **plugins** — self-contained bundles that ship skills, agents, hooks, docs, and a permissions block as needed. The plugin is also the unit the (post-v0) LLM frontend picks from.
+- Reusable capabilities are organized as **plugins** — self-contained bundles that ship skills, agents, hooks, workflows, MCP resources, docs, and a permissions block as needed. The plugin is also the unit the (post-v0) LLM frontend picks from.
 - A typical project's yaml fits in roughly 20–30 lines and reads top-to-bottom as "who this project is + what stack it's on + what extras it needs beyond the defaults."
 
 ## North Star
@@ -91,6 +93,8 @@ The README is plain markdown — no required frontmatter in v0. A recommended st
 - Skills: <comma-separated list, or "none">
 - Agents: <list, or "none">
 - Hooks: <list, or "none">
+- Workflows: <list, or "none">
+- MCP: <list, or "none">
 - Docs: <list of output paths, or "none">
 - Permissions: <"yes" or "no">
 
