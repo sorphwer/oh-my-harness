@@ -22,14 +22,14 @@ Natural language intent
  |   preset -> plugin id list                      |
  |   merge extras.plugins                          |
  |   walk plugins/<id>/{skills,agents,hooks,       |
- |     workflows,mcp,docs,permissions.json}        |
+ |     workflows,mcp,renderable docs,permissions}  |
  |     for every enabled plugin                    |
  |   resolve extras.{skills,agents,hooks,          |
  |     workflows,mcp} (each                        |
  |     entry is "<plugin>:<name>")                 |
  |   resolve references (pool id or path)          |
  | render                                          |
- |   eta-render docs with stack/contract params    |
+ |   eta-render manifest-backed docs               |
  |   aggregate skills -> SKILLS.md                 |
  |   copy agents + workflows; merge MCP configs    |
  |   merge permissions + hooks + plugin list into  |
@@ -45,7 +45,7 @@ Local content directories:
 
 plugins/<id>/      -> self-contained bundles (any of: README.md, skills/, agents/, hooks/, workflows/, mcp/, docs/, permissions.json)
 plugins/INDEX.md   -> browsable inventory of copied current Codex plugins + standalone skills
-references-pool/   -> shared raw LLM-readable reference files
+references-pool/   -> planned shared raw LLM-readable reference files; created when reference fixtures land
 presets/<name>.ts  -> named plugin id lists (post-v0; hardcoded in compiler for v0)
 ```
 
@@ -61,7 +61,7 @@ User or LLM writes harness.yaml
   -> emit: write files under outDir without deleting unrelated files
 ```
 
-The first implementation target is `example/nextjs-acme/harness.yaml -> example/nextjs-acme/.harness/` using a subset rule: the compiler only has to byte-match the files it emits, while the hand-filled demo may contain additional docs not yet produced by v0.
+The first implementation target is `harness-kit-example/nextjs-acme/harness.yaml -> harness-kit-example/nextjs-acme/.harness/` using a subset rule: the compiler only has to byte-match the files it emits, while the hand-filled demo may contain additional docs not yet produced by v0.
 
 ## Matrix IR
 
@@ -101,13 +101,13 @@ The single unit of reusable content. A plugin is a directory under `plugins/<id>
 | `docs/<name>/{manifest.ts, template.md}` | optional, 0..N | one rendered file at the path the manifest declares |
 | `permissions.json` | optional, 0..1 | merged into the `permissions` block of `.harness/.claude/settings.example.json` |
 
-Every skill, hook, workflow, top-level agent, and MCP resource declares stage metadata; skill-local `agents/openai.yaml` inherits its parent skill stage.
+Every skill, hook, workflow, top-level agent, and MCP resource declares stage metadata; skill-local `agents/openai.yaml` inherits its parent skill stage. Only `docs/<name>/{manifest.ts, template.md}` pairs are compiler-rendered doc contributions; copied plugin docs such as `plugins/browser/docs/capabilities/*` are auxiliary plugin-local reference material unless a future spec promotes them.
 
 A plugin can be multi-skill (e.g. `plugins/planning/`: three skills under `skills/`), single-skill (e.g. `plugins/debugging/`: one `skills/systematic-debugging/SKILL.md`), pure-doc + permissions ("stack plugin" — planned `plugins/nextjs/`: `docs/` + `permissions.json`), or any combination. This repo also contains copied Codex plugin bundles whose original metadata is preserved under `.codex-plugin/plugin.json`; standalone active Codex skills are grouped into harness-local container plugins so the compiler can address them through the same `plugins/<id>/skills/<name>/SKILL.md` layout. Selection: pulled in via the `preset` (which lists plugin ids) or `extras.plugins`. Individual sub-resources can also be pulled in via `extras.{skills,agents,hooks,workflows,mcp}` using `<plugin>:<name>` ids without enabling the whole plugin.
 
 ### Reference File
 
-- source: `references-pool/<name>.<ext>` *or* a path supplied in `harness.yaml`
+- source: `references-pool/<name>.<ext>` when the pool exists *or* a path supplied in `harness.yaml`
 - role: raw, LLM-readable reference material
 - output: `.harness/docs/references/<basename>`
 
@@ -137,7 +137,7 @@ There is no web API and no production service. The public surface for v0 is:
 |---------|--------|---------|
 | `harness.yaml` schema | v0 scope | Authoring contract |
 | `compile(yamlPath, outDir)` | v0 scope | Deterministic compile entrypoint |
-| `example/nextjs-acme` fixture | v0 scope | Round-trip acceptance target |
+| `harness-kit-example/nextjs-acme` fixture | v0 scope | Round-trip acceptance target |
 | CLI command | deferred | Future developer convenience |
 | LLM frontend | deferred | Future yaml authoring helper |
 

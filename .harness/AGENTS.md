@@ -24,8 +24,8 @@ The GitHub repo is named `oh-my-harness` for historical reasons. The published n
 ## Current Status
 
 - Product model: settled.
-- Stdlib skeleton: `example/nextjs/.harness/` exists and is hand-written.
-- Filled demo: `example/nextjs-acme/.harness/` exists.
+- Stdlib skeleton: `harness-kit-example/nextjs/.harness/` exists and is hand-written.
+- Filled demo: `harness-kit-example/nextjs-acme/.harness/` exists.
 - MVP v0 spec and implementation plan: migrated into `.harness/docs/superpowers/`.
 - Compiler, CLI, root `harness.yaml`, and self-host generation: not implemented yet.
 
@@ -40,7 +40,7 @@ Do not skip ahead:
 5. Add `--watch`.
 6. Add the natural-language to yaml LLM frontend.
 
-The active v0 implementation plan intentionally starts with `example/nextjs-acme`, because it is a filled-in target. `example/nextjs` remains the stdlib skeleton and broader reference.
+The active v0 implementation plan intentionally starts with `harness-kit-example/nextjs-acme`, because it is a filled-in target. `harness-kit-example/nextjs` remains the stdlib skeleton and broader reference.
 
 ## Tech Stack
 
@@ -63,11 +63,11 @@ Content directories (current):
   - `hooks/<name>.json` - merged into `.claude/settings.example.json`'s `hooks` block
   - `workflows/<name>.md` - copied to `.harness/workflows/<plugin>-<name>.md`
   - `mcp/<name>.json` - merged into `.harness/mcp/config.json`; stage-indexed for retrieval but not coverage-eligible
-  - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
+  - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest; other plugin-local docs are auxiliary reference material, not renderable harness docs
   - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
 
   On disk today: the original bootstrap skills-only plugins (`planning`, `debugging`, `frontend`, `backend`, `delivery`, `security-review`) plus a copied snapshot of the current Codex session's real plugin and standalone skill inventory. Start from `plugins/INDEX.md` when you need the active inventory. The copied snapshot includes the enabled Codex plugins (`browser`, `codex-security`, `computer-use`, `documents`, `github`, `presentations`, `spreadsheets`, `superpowers`) and two harness-local containers for active standalone skills (`codex-system-skills`, `codex-user-skills`).
-- `references-pool/` - shared raw LLM-readable reference files
+- `references-pool/` - planned shared raw LLM-readable reference files; create when reference fixtures land
 - `presets/<name>.ts` - named plugin id lists (post-v0; hardcoded in compiler for v0)
 
 ## Planning Document Convention
@@ -302,8 +302,10 @@ src/
 plugins/
   INDEX.md
 references-pool/
+  # planned; create when reference fixtures land
 test/
 harness-kit-example/
+  nextjs/
   nextjs-acme/
 ```
 
