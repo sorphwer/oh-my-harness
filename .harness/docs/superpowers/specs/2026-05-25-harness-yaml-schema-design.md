@@ -103,7 +103,7 @@ The README is plain markdown — no required frontmatter in v0. A recommended st
 <a paragraph or two: what kind of project this is for, what assumptions it makes>
 ```
 
-The compiler does not read `README.md` and does not enforce its shape. v0 ships the four READMEs listed under "Repo Layout" below; we'll formalize the format only if/when the LLM frontend needs more structure.
+The compiler does not read `README.md` and does not enforce its shape. Current plugin inventory is summarized in `plugins/INDEX.md`; we'll formalize the README format only if/when the LLM frontend needs more structure.
 
 ## Preset
 
@@ -272,6 +272,7 @@ Output map:
 
 ```
 plugins/
+  INDEX.md                  # compact current inventory and stage coverage summary
   planning/                 # multi-skill — intent capture, specs, plans, TDD
     README.md
     skills/
@@ -308,6 +309,7 @@ plugins/
       threat-model/SKILL.md
       security-scan/SKILL.md
       fix-security-finding/SKILL.md
+  ...                       # copied Codex plugin bundles and standalone-skill containers; see INDEX.md
   nextjs/                   # PLANNED stack plugin (created during v1 implementation)
     README.md
     docs/
@@ -329,7 +331,13 @@ harness-kit-example/
     .harness/               # compiled output (round-trip test target)
 ```
 
-For v0, only `plugins/` and `references-pool/` need to physically exist as content directories; `presets/` stays hardcoded in `src/compile.ts` until a second preset appears. The six skill-plugins (`planning`…`security-review`) and `references-pool/` exist today; the `nextjs` stack plugin is built during v1 implementation.
+For v0, `plugins/` is the active content directory and `plugins/INDEX.md`
+summarizes the current copied inventory. `references-pool/` is created when
+reference fixtures land; `presets/` stays hardcoded in `src/compile.ts` until a
+second preset appears. The current plugin inventory includes the bootstrap
+skills-only plugins plus copied Codex plugin bundles and standalone-skill
+container plugins; the `nextjs` stack plugin is still planned for v1
+implementation.
 
 ## Migration From the Pre-Redesign Layout
 

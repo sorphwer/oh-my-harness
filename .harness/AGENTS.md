@@ -299,12 +299,11 @@ Planned repo implementation structure:
 src/
   compile.ts
   stages.ts
-docs-pool/
-catalog/
+plugins/
+  INDEX.md
 references-pool/
 test/
-example/
-  nextjs/
+harness-kit-example/
   nextjs-acme/
 ```
 
