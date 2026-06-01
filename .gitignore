@@ -7,3 +7,5 @@ outputs/
 webapp/.sessions/
 webapp/next-env.d.ts
 webapp/conversations/
+
+webapp/tsconfig.tsbuildinfo
