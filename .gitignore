@@ -1,0 +1,9 @@
+node_modules/
+dist/
+outputs/
+*.log
+.DS_Store
+.next/
+webapp/.sessions/
+webapp/next-env.d.ts
+webapp/conversations/

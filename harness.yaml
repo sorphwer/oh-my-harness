@@ -1,0 +1,6 @@
+name: oh-my-harness
+displayName: harness-kit
+plugins:
+  - planning
+  - delivery
+  - debugging
