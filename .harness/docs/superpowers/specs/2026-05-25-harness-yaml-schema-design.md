@@ -1,16 +1,24 @@
 # harness.yaml Schema & Resource Model — Design
 
 Date: 2026-05-25
-Status: draft, pending user review
+Status: deprecated
 
-> **Extended by the
+> **DEPRECATED — historical only.** This schema spec records an intermediate
+> transition away from `catalog/`, `agents-pool/`, `hooks-pool`, and
+> `skills-pool/`. Current work uses the accepted compiler v1 design:
+> [`2026-05-27-yaml-to-harness-compiler-v1-design.md`](2026-05-27-yaml-to-harness-compiler-v1-design.md).
+> In current v1 docs, plugins are first-class and the minimal prototype already
+> exists in `src/compile.ts`.
+
+> Historical note: this spec was later extended by the
 > [`plugin-stage matrix spec`](2026-05-26-plugin-stage-matrix-design.md)
-> (2026-05-26).** Plugin resources
-> carry closed lifecycle-stage metadata. Plugin source layout now also accepts
-> `workflows/<name>.md` and `mcp/<name>.json`; `extras` accepts `workflows`
-> and `mcp` selectors. The yaml selection model remains plugin-owned.
+> (2026-05-26). That matrix remains useful as future IR direction, but this
+> yaml schema is not the active compiler contract.
 
-Supersedes: the "Yaml Schema (v0)" section of `2026-05-25-mvp-development-design.md` (the rest of that spec — pipeline, test strategy, dependencies, acceptance criterion — still stands)
+Historical note: this file originally superseded the "Yaml Schema (v0)" section
+of `2026-05-25-mvp-development-design.md`. It is now superseded by the
+2026-05-27 compiler v1 design and should not be used as the active yaml
+contract.
 
 ## Goal
 

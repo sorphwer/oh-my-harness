@@ -4,6 +4,15 @@ This inventory is the current source snapshot for harness-kit plugin resources.
 Skills stay under their owning plugin; stages are retrieval and coverage
 metadata.
 
+Compiler v1 uses this tree only to validate selected plugin ids and generate
+`PLUGINS.md`. It does not yet copy plugin skill, agent, or rules bodies. The
+current v1 docs treat plugins as first-class resources; the future resource
+identities remain plugin-scoped: `plugin.skill`, `plugin.agent`, and
+`plugin.rules`.
+
+Deprecated v0 pool layouts (`docs-pool`, `catalog`, `skills-pool`,
+`agents-pool`, `hooks-pool`, and permission pools) must not be reintroduced.
+
 ## Resource Counts
 
 | Resource | Count | Notes |
@@ -30,4 +39,6 @@ metadata.
 
 ## Full Assignment Table
 
-Use the assignment table in `.harness/docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md` as the canonical edit list for this migration.
+The assignment table in `.harness/docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md`
+is the historical edit list for the stage metadata migration. Treat
+`src/stages.ts` and this inventory as the current entrypoints.

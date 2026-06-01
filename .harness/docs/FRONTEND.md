@@ -1,52 +1,69 @@
 # Interface Conventions
 
-harness-kit does not have a product frontend in the current MVP. The first interface is a local compiler function, followed later by a CLI. This file records conventions for any human-facing surface that gets added.
+harness-kit does not have a product frontend. The current interface is a direct
+TypeScript development entrypoint plus the generated `.harness/` document tree.
 
 ## Current Interface
 
-v0 exposes:
+Programmatic API:
 
 ```ts
-compile(yamlPath: string, outDir: string): Promise<void>
+compile(yamlPath: string): Promise<string>
 ```
 
-This API is intentionally plain. It lets tests exercise the compiler before the project commits to CLI shape, command name, install flow, or package publishing.
+Development entrypoint:
 
-## Future CLI Principles
+```bash
+npx tsx src/compile.ts <harness.yaml>
+```
 
-- Keep commands literal: `compile`, `check`, `watch`, `init`.
-- Prefer explicit paths over implicit global state.
-- Print file paths relative to the current working directory when possible.
-- Fail with actionable messages that name the yaml path, fragment id, or output path involved.
-- Do not require network access for compile, check, or watch.
-- Do not call an LLM unless the user explicitly invokes an authoring command.
+Example:
 
-## Documentation UI
+```bash
+npx tsx src/compile.ts harness.yaml
+```
 
-The generated `.harness/` folder is itself a reading interface. Generated docs should be:
+This entrypoint is intentionally plain. It proves compiler behavior before the
+project commits to a packaged CLI command name, install flow, or publishing
+workflow.
 
-- concrete to the target project
-- free of skeleton placeholders
+## Generated Documentation UI
+
+The generated `outputs/.harness-<YYYYMMDD-HHMMSS>-<hash4>/` folder is itself
+the first reading interface.
+Generated docs should be:
+
+- concrete about what is known and what still needs user answers
+- free of template variables and unresolved markers
 - consistent in terminology
 - short enough for agents to load selectively
 - linked by relative paths that work in a plain repository browser
 
 ## Command Output Conventions
 
-When the CLI exists:
+Current success prints the generated output folder and exits 0 after writing
+files.
 
-- Successful compile: print the output folder and count of written files.
-- Check success: print that the generated output matches expected output.
-- Validation failure: print yaml path and schema path.
-- Unknown id: print the missing id and the pool that was searched.
-- Render failure: print the doc id and output path.
-- Emit failure: print the file path that could not be written.
+Future command output should:
 
-## V1 Boundaries
+- print the count of written files on successful compile
+- name the yaml path and schema issue on validation failure
+- name the missing plugin id on plugin resolution failure
+- name the missing template path on template failure
+- name the target path on emit failure
+
+## Future CLI Principles
+
+- Defer final command names until the packaged CLI is designed.
+- Prefer explicit paths over implicit global state.
+- Print file paths relative to the current working directory when possible.
+- Do not require network access for compile, check, or watch.
+- Do not call an LLM unless the user explicitly invokes an authoring command.
+
+## Boundaries
 
 - No terminal UI framework.
 - No web dashboard.
-- No interactive wizard before the compiler is proven.
+- No interactive wizard before the compiler contract is stable.
 - No spinner or animated output in CI mode.
 - No remote template gallery in the deterministic compile path.
-

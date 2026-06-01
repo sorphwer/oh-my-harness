@@ -1,6 +1,12 @@
 # harness-kit MVP v1 Implementation Plan
 
-> **NEEDS REWRITE (2026-05-25 reorg).** This plan was authored before the `skills-pool/` → `plugins/<category>/skills/<name>/SKILL.md` reorganization. It still assumes (a) plugin ids `superpowers` / `code-review` (now `planning` / `delivery` etc. on disk), (b) skill source format `skills/<name>.json` (now nested `skills/<name>/SKILL.md` with frontmatter), and (c) a `CatalogEntry` JSON schema. Do NOT execute this plan as-written — it will create a parallel, divergent plugin tree. Re-run `writing-plans` against the current spec (`../specs/2026-05-25-harness-yaml-schema-design.md`) to produce a v2 plan that targets the on-disk layout.
+> **DEPRECATED — DO NOT EXECUTE.** This plan was authored during the
+> `skills-pool/` to `plugins/<category>/skills/<name>/SKILL.md` transition and
+> predates the current compiler v1 prototype. It still assumes stale plugin
+> ids, stale skill source formats, and a `CatalogEntry` JSON schema. Current
+> work targets
+> [`2026-05-27-yaml-to-harness-compiler-v1-design.md`](../specs/2026-05-27-yaml-to-harness-compiler-v1-design.md):
+> v1 docs, plugin-first resources, and the minimal prototype in `src/compile.ts`.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
