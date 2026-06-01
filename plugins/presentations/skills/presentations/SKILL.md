@@ -1,6 +1,7 @@
 ---
 name: Presentations
 description: Build PowerPoint PPTX decks with artifact-tool presentation JSX
+stage: [implement, verify, deliver]
 ---
 
 # Presentations

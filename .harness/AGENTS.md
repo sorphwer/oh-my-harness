@@ -1,6 +1,6 @@
 # harness-kit Development Guide
 
-> Authoritative guide for AI coding agents (Claude Code, Codex, Cursor) and human contributors working on harness-kit. This root `.harness/` is currently hand-bootstrapped from the examples; once `./harness.yaml` exists and the compiler can self-host, this folder becomes compiler output.
+> Authoritative guide for AI coding agents (Claude Code, Codex, Cursor) and human contributors working on harness-kit. This root `.harness/` is currently hand-maintained. A root `harness.yaml` exists, and compiler v1 generates timestamped harness runs under `outputs/`, but this live `.harness/` must not be overwritten until self-hosting is explicitly approved.
 
 ## Project Overview
 
@@ -13,60 +13,59 @@ The GitHub repo is named `oh-my-harness` for historical reasons. The published n
 - `harness.yaml` is the source of truth for a project harness.
 - `.harness/` is generated output, not a hand-edited authoring surface once a yaml exists.
 - Compile direction is one-way: `harness.yaml -> .harness/`. There is no folder-to-yaml reverse extraction.
-- The compiler is deterministic code: same yaml, same content pools, same compiler version, same output bytes.
-- The compiler does not call an LLM, require an API key, reach the network, or use timestamps / random IDs in output.
+- The compiler is deterministic for generated file contents: same yaml, same content pools, same compiler version, same output bytes.
+- The compiler does not call an LLM, require an API key, or reach the network.
+- Each compiler run writes to `outputs/.harness-<YYYYMMDD-HHMMSS>-<hash4>`.
 - The LLM frontend is optional and only helps produce an initial `harness.yaml`.
 - The deliverable is a methodology / document harness, not a hook enforcement framework.
-- Hooks stay secondary and minimal: permissions allowlist first, maybe a plan-required gate later.
+- Any future hook support stays secondary and must not displace the doc-led product model.
 - User-facing positioning must not overlap with `kyu1204/oh-my-harness`'s hook-led pitch. Lead with "methodology bundle", "doc harness", and "compiled from a yaml".
 - Dogfooding is an acceptance test: this repo must eventually generate its own `./.harness/` from `./harness.yaml`.
 
 ## Current Status
 
-- Product model: settled.
-- Stdlib skeleton: `example/nextjs/.harness/` exists and is hand-written.
-- Filled demo: `example/nextjs-acme/.harness/` exists.
-- MVP v0 spec and implementation plan: migrated into `.harness/docs/superpowers/`.
-- Compiler, CLI, root `harness.yaml`, and self-host generation: not implemented yet.
+- Product model: compiler v1 docs, with plugins as first-class resources.
+- Prototype status: v1 has a minimal runnable compiler prototype.
+- Root manifest: `harness.yaml` exists with `planning`, `delivery`, and `debugging`.
+- Fixed harness templates: `.harness/templates/` contains the 11 always-on Markdown templates.
+- Compiler: `src/compile.ts` is implemented and runnable through `npx tsx src/compile.ts <harness.yaml>`.
+- Current output: fixed template files plus `PLUGINS.md` plugin inventory under a generated `outputs/.harness-<timestamp>-<hash4>/` directory.
+- Root `.harness/`: still hand-maintained; do not overwrite it without an explicit self-hosting decision.
+- Deferred: copying plugin skill, agent, or rules bodies; references output; `.claude` output; stage matrix output; watch/check modes; packaged CLI; LLM frontend.
 
-## MVP Development Order
+## Current Development Order
 
 Do not skip ahead:
 
-1. Define the minimal yaml schema needed to reproduce the current example target.
-2. Build the deterministic compiler from yaml to folder.
-3. Extract the skills pool from hand-written harness content.
-4. Self-host this repo with `./harness.yaml` and generated `./.harness/`.
-5. Add `--watch`.
-6. Add the natural-language to yaml LLM frontend.
+1. Keep the current compiler v1 prototype runnable: yaml schema, fixed templates, plugin inventory, and tests.
+2. Decide the schemas for plugin-owned resources before implementing body output. Future resource identities are `plugin.skill`, `plugin.agent`, and `plugin.rules`.
+3. Add plugin resource projection only after those schemas are agreed.
+4. Decide whether and when to replace this repo's live `.harness/` with generated output.
+5. Add references, `.claude` adapters, and stage matrix output after the core resource model is stable.
+6. Add watch/check modes, package publishing, and the LLM yaml authoring frontend later.
 
-The active v0 implementation plan intentionally starts with `example/nextjs-acme`, because it is a filled-in target. `example/nextjs` remains the stdlib skeleton and broader reference.
+Legacy examples under `harness-kit-example/nextjs/`, `harness-kit-example/nextjs-acme/`, and `harness-kit-example/dify/` are references, not the current compiler acceptance target. The current fixture is `harness-kit-example/compiler-v1/harness.yaml`.
 
 ## Tech Stack
 
-Planned for compiler v0:
+Compiler v1 current:
 
 - Node.js ESM
 - TypeScript strict mode
 - `yaml` for manifest parsing
 - `zod` for schema validation
-- `eta` for markdown template rendering
 - `tsx` for running TypeScript directly during development
 - `vitest` for fixture tests
 
 Content directories (current):
 
-- `plugins/<id>/` - self-contained bundles. Each plugin can ship any combination of:
-  - `README.md` (required) - LLM- and human-readable description
-  - `skills/<name>/SKILL.md` - frontmatter (`name`, `description`) + body; aggregated into `SKILLS.md`
-  - `agents/<name>.md` - copied to `.claude/agents/<name>.md`
-  - `hooks/<name>.json` - merged into `.claude/settings.example.json`'s `hooks` block
-  - `docs/<name>/{manifest.ts, template.md}` - rendered to the path declared in the manifest
-  - `permissions.json` - merged into `.claude/settings.example.json`'s `permissions` block
-
-  On disk today: the original bootstrap skills-only plugins (`planning`, `debugging`, `frontend`, `backend`, `delivery`, `security-review`) plus a copied snapshot of the current Codex session's real plugin and standalone skill inventory. Start from `plugins/INDEX.md` when you need the active inventory. The copied snapshot includes the enabled Codex plugins (`browser`, `codex-security`, `computer-use`, `documents`, `github`, `presentations`, `spreadsheets`, `superpowers`) and two harness-local containers for active standalone skills (`codex-system-skills`, `codex-user-skills`).
-- `references-pool/` - shared raw LLM-readable reference files
-- `presets/<name>.ts` - named plugin id lists (post-v0; hardcoded in compiler for v0)
+- `.harness/templates/` - fixed, always-on source templates. They mirror the output paths and are copied as Markdown, without variables.
+- `plugins/<id>/` - plugin source directories. The v1 prototype validates selected plugin ids and writes an ordered inventory to `PLUGINS.md`; plugin resource bodies are deferred.
+- `plugins/INDEX.md` - current plugin and skill inventory entrypoint.
+- `harness-kit-example/compiler-v1/` - compiler v1 fixture.
+- `harness-kit-example/{nextjs,nextjs-acme,dify}/` - legacy references and examples, not current compiler acceptance targets.
+- `references-pool/` - deferred until reference output is designed.
+- `presets/<name>.ts` - deferred named plugin id lists.
 
 ## Planning Document Convention
 
@@ -79,24 +78,33 @@ Canonical planning docs for this repo live under `.harness/docs/superpowers/`:
 
 - [`.harness/docs/superpowers/README.md`](docs/superpowers/README.md)
 
-Current MVP docs:
+Current v1 docs:
 
-- Spec: [`.harness/docs/superpowers/specs/2026-05-25-mvp-development-design.md`](docs/superpowers/specs/2026-05-25-mvp-development-design.md)
-- Plan: [`.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md`](docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md) — **SUPERSEDED**
-- Schema spec: [`.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`](docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md)
+- Compiler v1 spec: [`.harness/docs/superpowers/specs/2026-05-27-yaml-to-harness-compiler-v1-design.md`](docs/superpowers/specs/2026-05-27-yaml-to-harness-compiler-v1-design.md)
+- Compiler v1 plan: [`.harness/docs/superpowers/plans/2026-05-27-yaml-to-harness-compiler-v1.md`](docs/superpowers/plans/2026-05-27-yaml-to-harness-compiler-v1.md)
+- Historical v0 plan: [`.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md`](docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md) - **DEPRECATED**
+- Historical schema spec: [`.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`](docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md) - **DEPRECATED**
 - Matrix spec: [`.harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`](docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md)
 - Matrix plan: [`.harness/docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md`](docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md)
+
+Deprecated historical material:
+
+- The v0 pool model (`docs-pool`, `catalog`, `skills-pool`,
+  `agents-pool`, `hooks-pool`, and permission pools) is deprecated.
+- Do not implement new work from the 2026-05-25 v0/v1 execution plans.
+- New implementation work targets the 2026-05-27 compiler v1 spec and the
+  plugin-first resource model.
 
 Root `CLAUDE.md`, `AGENTS.md`, and `README.md` are lightweight entry points. Keep repo-specific process rules in `.harness/` so there is one canonical location.
 
 ## Change Process
 
 - For non-trivial code work, start from an approved spec and implementation plan.
-- Keep changes narrowly scoped to the current MVP phase.
-- Do not add CLI flags, watch mode, check mode, packaging, or LLM behavior while implementing v0 unless a plan explicitly changes scope.
+- Keep changes narrowly scoped to the compiler v1 prototype unless the active spec changes.
+- Do not add CLI flags, watch mode, check mode, packaging, `.claude` adapters, references output, stage matrix output, plugin resource body output, or LLM behavior unless a plan explicitly changes scope.
 - If a change expands the yaml schema, update the schema docs and fixtures in the same phase.
 - If a generated output folder already has a yaml source, edit the yaml and recompile instead of hand-editing the folder.
-- Until this repo has root `harness.yaml`, root `.harness/` may be edited directly, but treat those edits as bootstrap work that must later become compiler output.
+- Do not write generated output into this repo's live `.harness/` without explicit approval. Smoke tests should use the default `outputs/` run directory.
 
 ## Operating Rules
 
@@ -250,13 +258,19 @@ If the incoming task contains any Zero-Pause trigger phrase, the agent MUST
 operate under full Zero-Pause Continuous Execution Mode from the first token.
 No separate confirmation is required or allowed.
 
+## Stage Tagging
+
+Every stage-indexed plugin resource declares one or more lifecycle stages from `src/stages.ts`. Skills declare stages in `SKILL.md` frontmatter. Hooks and MCP resources use top-level JSON fields; workflows and top-level agents use frontmatter. Skill-local `agents/openai.yaml` files inherit their parent skill stage. MCP resources are stage-indexed for retrieval but do not satisfy coverage.
+
+Skills must remain under their owning plugin. Stages are retrieval and coverage metadata, not packaging boundaries.
+
 ## Security Requirements
 
 - No secrets or API keys in sample harnesses, fixtures, references, or generated output.
 - No network access in the compile path.
 - No LLM call in the compile path.
 - Validate yaml before resolving fragments.
-- Prevent output path traversal; generated files must stay under the requested `outDir`.
+- Prevent output path traversal; generated files must stay under the generated run directory in `outputs/`.
 - Treat content pools as local trusted project code, not user-supplied remote code.
 - Do not ship broad hook-enforcement behavior under the harness-kit name.
 
@@ -266,8 +280,10 @@ No separate confirmation is required or allowed.
 .harness/
 ├── AGENTS.md
 ├── ARCHITECTURE.md
-├── .claude/
-│   └── settings.example.json
+├── templates/
+│   ├── AGENTS.md
+│   ├── ARCHITECTURE.md
+│   └── docs/
 └── docs/
     ├── DESIGN.md
     ├── FRONTEND.md
@@ -288,30 +304,33 @@ No separate confirmation is required or allowed.
 Planned repo implementation structure:
 
 ```text
+harness.yaml
 src/
   compile.ts
-docs-pool/
-catalog/
-references-pool/
+  stages.ts
+plugins/
+  INDEX.md
 test/
-example/
-  nextjs/
-  nextjs-acme/
+harness-kit-example/
+  compiler-v1/
+  nextjs/       # legacy reference
+  nextjs-acme/  # legacy reference
+  dify/         # legacy reference
 ```
 
 ## Development Commands
 
-These commands become canonical once the v0 scaffold lands:
+Canonical compiler v1 development commands:
 
 ```bash
 npm install
 npm test
-npm run test:watch
-npx tsc --noEmit
-npx tsx src/compile.ts
+npm run typecheck
+npx tsx src/compile.ts harness.yaml
 ```
 
-Until `package.json` exists, rely on file inspection and the active implementation plan.
+The compiler prints the generated `outputs/.harness-<YYYYMMDD-HHMMSS>-<hash4>` path.
+Do not target this repo's live `.harness/` unless the user has explicitly approved self-host overwrite for that run.
 
 ## General Coding Guidelines
 

@@ -1,67 +1,158 @@
-# Plugin × Stage Matrix — Implementation Plan
+# Plugin Stage Matrix Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Lock the stage vocabulary and matrix model into the repo's documentation, schema, and plugin source files so that the next compiler implementation pass (the v1-rewrite plan) can implement the matrix without re-debating semantics. This plan is **doc + frontmatter only**; no compiler code is written here.
+**Goal:** Tag every current plugin resource with lifecycle stages in place and publish the full plugin x stage matrix without moving skills out of their owning plugins.
 
-**Architecture:** Three layers of change land in order — (1) authoritative stage constants module (TypeScript const + zod enum), (2) every existing plugin source file gains `stage` frontmatter, (3) `.harness/` planning documents (architecture, schema spec, agents guide) cross-reference the new model. The compiler itself is touched only to the extent that `src/stages.ts` becomes the future zod source-of-truth; resolver / matrix / emitter changes are deferred to the v1-rewrite plan.
+**Architecture:** Plugins remain the distribution and ownership boundary. `stage` metadata is added to each `SKILL.md`; skill-local `agents/openai.yaml` files inherit their parent skill stage; MCP config is mirrored into the plugin `mcp/` resource home for stage indexing but does not satisfy coverage. The matrix is recorded in `plugins/INDEX.md` and later becomes compiler IR.
+
+**Tech Stack:** Markdown frontmatter, YAML metadata, JSON MCP config, shell/Node one-liners for verification.
 
 **Spec:** [`../specs/2026-05-26-plugin-stage-matrix-design.md`](../specs/2026-05-26-plugin-stage-matrix-design.md)
 
 **Extends:** [`../specs/2026-05-25-harness-yaml-schema-design.md`](../specs/2026-05-25-harness-yaml-schema-design.md)
 
-**Predecessor plan:** [`2026-05-25-harness-kit-mvp-v1.md`](2026-05-25-harness-kit-mvp-v1.md) (marked NEEDS REWRITE; the rewrite that absorbs this matrix model is tracked as a separate plan to be authored after this one lands).
+**Supersedes:** The earlier narrow version of this plan that only tagged the 18 bootstrap skills. Current scope is every `SKILL.md` under `plugins/`, excluding vendored payloads such as `node_modules/` and `.app/Contents/`.
 
 ---
 
 ## File Structure
 
-Files this plan creates or modifies:
-
 **New:**
 
-- `src/stages.ts` — closed stage vocabulary as TypeScript const + zod enum + required-stages array. Authoritative source.
+- `src/stages.ts` - closed stage vocabulary, required stages, default stage, and zod schemas.
+- `plugins/computer-use/mcp/computer-use.json` - harness-kit MCP resource mirror for the existing upstream `plugins/computer-use/.mcp.json`.
 
-**Modified — plugin source frontmatter (add `stage` field):**
+**Modified:**
 
-- `plugins/planning/skills/brainstorming/SKILL.md`
-- `plugins/planning/skills/spec-first-planning/SKILL.md`
-- `plugins/planning/skills/test-driven-development/SKILL.md`
-- `plugins/debugging/skills/systematic-debugging/SKILL.md`
-- `plugins/frontend/skills/frontend-implementation/SKILL.md`
-- `plugins/frontend/skills/frontend-polish/SKILL.md`
-- `plugins/frontend/skills/accessibility-audit/SKILL.md`
-- `plugins/backend/skills/api-design/SKILL.md`
-- `plugins/backend/skills/backend-change/SKILL.md`
-- `plugins/backend/skills/data-integrity/SKILL.md`
-- `plugins/delivery/skills/code-review/SKILL.md`
-- `plugins/delivery/skills/requesting-code-review/SKILL.md`
-- `plugins/delivery/skills/receiving-code-review/SKILL.md`
-- `plugins/delivery/skills/verification-before-completion/SKILL.md`
-- `plugins/delivery/skills/finishing-branch/SKILL.md`
-- `plugins/security-review/skills/threat-model/SKILL.md`
-- `plugins/security-review/skills/security-scan/SKILL.md`
-- `plugins/security-review/skills/fix-security-finding/SKILL.md`
-
-**Modified — documentation:**
-
-- `.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md` — add forward-reference to matrix spec; broaden plugin sub-directory list to 7 entries (`workflows/`, `mcp/`); extend `extras` schema with `workflows` and `mcp` namespaces.
-- `.harness/ARCHITECTURE.md` — collapse the linear pipeline diagram into the matrix-IR view; add `stage` frontmatter to the Plugin section; add a Matrix section.
-- `.harness/AGENTS.md` — add a short subsection describing stage tagging as a content-authoring rule; add `src/stages.ts` to the planned implementation structure.
+- `plugins/**/skills/**/SKILL.md` - add or update `stage: [...]` frontmatter on all 83 current skills.
+- `plugins/INDEX.md` - replace raw inventory with a plugin x stage matrix, coverage summary, and companion-agent/MCP notes.
+- `.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md` - forward-reference the matrix spec and add `workflows` / `mcp` extras.
+- `.harness/ARCHITECTURE.md` - document matrix IR and stage projections.
+- `.harness/AGENTS.md` - document stage-tagging authoring rules and the `src/stages.ts` source of truth.
 
 **Not modified:**
 
-- `plugins/*/README.md` — plugin READMEs are author-facing summaries; per-skill stage assignments live with the skill, not the README.
-- `harness-kit-example/nextjs-acme/harness.yaml` — yaml shape is unchanged by this revision (matrix is a compiler-internal IR).
-- `harness-kit-example/nextjs-acme/.harness/` — these are pre-compiler hand-curated targets; they will be refreshed when the v1-rewrite plan adds `manifest.json` and `stages/` emission.
+- `plugins/**/skills/**/agents/openai.yaml` - skill-local agent metadata inherits the parent skill's stage and is not independently tagged in this plan.
+- `plugins/computer-use/.mcp.json` - preserve the upstream Codex plugin metadata file; mirror it rather than move it.
+- Vendored payloads under `plugins/**/node_modules/` and app bundles under `plugins/**/*.app/Contents/`.
 
 ---
 
-## Task 0: Stage vocabulary module
+## Stage Assignment Table
 
-Single source of truth that every downstream zod schema and compiler component will import. Written now so frontmatter validation has a target to reference, even before the resolver exists.
+Skill id means the directory name under `plugins/<plugin>/skills/<skill>/`.
+
+| Plugin | Skill | Stage |
+|---|---|---|
+| `backend` | `api-design` | `[spec, implement]` |
+| `backend` | `backend-change` | `[implement]` |
+| `backend` | `data-integrity` | `[implement, verify]` |
+| `browser` | `browser` | `[explore, verify]` |
+| `codex-security` | `attack-path-analysis` | `[review]` |
+| `codex-security` | `finding-discovery` | `[explore, review]` |
+| `codex-security` | `fix-finding` | `[implement, verify]` |
+| `codex-security` | `security-scan` | `[spec, explore, verify, review]` |
+| `codex-security` | `threat-model` | `[spec]` |
+| `codex-security` | `validation` | `[verify, review]` |
+| `codex-system-skills` | `imagegen` | `[implement]` |
+| `codex-system-skills` | `openai-docs` | `[explore, spec, implement]` |
+| `codex-system-skills` | `plugin-creator` | `[implement]` |
+| `codex-system-skills` | `skill-creator` | `[spec, implement, verify]` |
+| `codex-system-skills` | `skill-installer` | `[implement]` |
+| `codex-user-skills` | `authoring-architecture-overview` | `[explore, deliver]` |
+| `codex-user-skills` | `design-taste-frontend` | `[spec, implement, verify]` |
+| `codex-user-skills` | `discord-js` | `[spec, implement, verify]` |
+| `codex-user-skills` | `dual-repo-cli-release` | `[spec, implement, deliver]` |
+| `codex-user-skills` | `full-output-enforcement` | `[freestyle]` |
+| `codex-user-skills` | `google-aip-api-design` | `[spec, implement, review]` |
+| `codex-user-skills` | `i-animate` | `[implement]` |
+| `codex-user-skills` | `i-audit` | `[verify, review]` |
+| `codex-user-skills` | `i-bolder` | `[implement]` |
+| `codex-user-skills` | `i-clarify` | `[implement]` |
+| `codex-user-skills` | `i-colorize` | `[implement]` |
+| `codex-user-skills` | `i-critique` | `[review]` |
+| `codex-user-skills` | `i-delight` | `[implement]` |
+| `codex-user-skills` | `i-distill` | `[implement]` |
+| `codex-user-skills` | `i-extract` | `[implement]` |
+| `codex-user-skills` | `i-frontend-design` | `[spec, implement]` |
+| `codex-user-skills` | `i-harden` | `[implement, verify]` |
+| `codex-user-skills` | `i-normalize` | `[implement, review]` |
+| `codex-user-skills` | `i-onboard` | `[spec, implement]` |
+| `codex-user-skills` | `i-optimize` | `[implement, verify]` |
+| `codex-user-skills` | `i-polish` | `[implement, verify]` |
+| `codex-user-skills` | `i-quieter` | `[implement]` |
+| `codex-user-skills` | `i-teach-impeccable` | `[intent, spec]` |
+| `codex-user-skills` | `pdf` | `[explore, implement, verify, deliver]` |
+| `codex-user-skills` | `redesign-existing-projects` | `[spec, implement, verify]` |
+| `codex-user-skills` | `ticket-reply-wording` | `[deliver]` |
+| `codex-user-skills` | `use-json-render-cli` | `[implement, verify, deliver]` |
+| `codex-user-skills` | `use-zendesk-cli` | `[explore, deliver]` |
+| `codex-user-skills` | `vercel-deploy` | `[verify, deliver]` |
+| `codex-user-skills` | `vercel-react-best-practices` | `[spec, implement, verify, review]` |
+| `codex-user-skills` | `web-design-guidelines` | `[verify, review]` |
+| `computer-use` | `computer-use` | `[explore, implement, verify]` |
+| `debugging` | `systematic-debugging` | `[explore, verify]` |
+| `delivery` | `code-review` | `[review]` |
+| `delivery` | `finishing-branch` | `[deliver]` |
+| `delivery` | `receiving-code-review` | `[review, implement]` |
+| `delivery` | `requesting-code-review` | `[review]` |
+| `delivery` | `verification-before-completion` | `[verify]` |
+| `documents` | `documents` | `[implement, verify, deliver]` |
+| `frontend` | `accessibility-audit` | `[verify]` |
+| `frontend` | `frontend-implementation` | `[implement]` |
+| `frontend` | `frontend-polish` | `[implement]` |
+| `github` | `gh-address-comments` | `[review, implement, verify]` |
+| `github` | `gh-fix-ci` | `[verify, implement]` |
+| `github` | `github` | `[explore, review]` |
+| `github` | `yeet` | `[deliver]` |
+| `planning` | `brainstorming` | `[intent]` |
+| `planning` | `spec-first-planning` | `[spec, plan]` |
+| `planning` | `test-driven-development` | `[implement, verify]` |
+| `presentations` | `presentations` | `[implement, verify, deliver]` |
+| `security-review` | `fix-security-finding` | `[implement, verify]` |
+| `security-review` | `security-scan` | `[spec, explore, verify, review]` |
+| `security-review` | `threat-model` | `[spec]` |
+| `spreadsheets` | `spreadsheets` | `[implement, verify, deliver]` |
+| `superpowers` | `brainstorming` | `[intent]` |
+| `superpowers` | `dispatching-parallel-agents` | `[plan, implement]` |
+| `superpowers` | `executing-plans` | `[implement, verify]` |
+| `superpowers` | `finishing-a-development-branch` | `[deliver]` |
+| `superpowers` | `receiving-code-review` | `[review, implement]` |
+| `superpowers` | `requesting-code-review` | `[review]` |
+| `superpowers` | `subagent-driven-development` | `[implement, verify]` |
+| `superpowers` | `systematic-debugging` | `[explore, verify]` |
+| `superpowers` | `test-driven-development` | `[implement, verify]` |
+| `superpowers` | `using-git-worktrees` | `[implement]` |
+| `superpowers` | `using-superpowers` | `[freestyle, intent]` |
+| `superpowers` | `verification-before-completion` | `[verify]` |
+| `superpowers` | `writing-plans` | `[plan]` |
+| `superpowers` | `writing-skills` | `[spec, implement, verify]` |
+
+MCP assignment:
+
+| Plugin | MCP resource | Stage | Coverage eligible? |
+|---|---|---|---|
+| `computer-use` | `computer-use` | `[explore, implement, verify]` | no |
+
+Skill-local companion agents:
+
+| Resource form | Count | Stage behavior | Coverage eligible? |
+|---|---:|---|---|
+| `plugins/*/skills/*/agents/openai.yaml` | 39 | inherits parent `SKILL.md` stage | no |
+
+Hooks:
+
+| Resource form | Count | Plan action |
+|---|---:|---|
+| `plugins/*/hooks/*` | 0 | no-op verification only |
+
+---
+
+## Task 0: Add Closed Stage Vocabulary Module
 
 **Files:**
+
 - Create: `src/stages.ts`
 
 - [ ] **Step 1: Create `src/stages.ts`**
@@ -74,15 +165,13 @@ import { z } from "zod";
  *
  * Source: .harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md
  *
- * Stages are a set, not a sequence. Resources declare their stage(s) via
- * frontmatter; the compiler indexes them into a plugin × stage matrix at
- * resolve time. Adding a new stage requires a spec change.
+ * Stages are a set, not a sequence. The array order is display order only.
  */
 export const STAGES = [
   "freestyle",
   "intent",
-  "plan",
   "spec",
+  "plan",
   "explore",
   "implement",
   "verify",
@@ -92,11 +181,6 @@ export const STAGES = [
 
 export type Stage = (typeof STAGES)[number];
 
-/**
- * Stages whose absence in a compiled harness produces a coverage warning.
- * A preset that fails to cover all five can not run a full development
- * cycle without help from extras.
- */
 export const REQUIRED_STAGES = [
   "intent",
   "plan",
@@ -105,509 +189,319 @@ export const REQUIRED_STAGES = [
   "deliver",
 ] as const satisfies readonly Stage[];
 
-/**
- * Resources without an explicit stage default to this value.
- * Lets unmodified plugins keep compiling during migration.
- */
 export const DEFAULT_STAGE: Stage = "freestyle";
 
 export const stageSchema = z.enum(STAGES);
 
-/**
- * Frontmatter accepts a single string or an array of strings. Both forms
- * normalize to a non-empty Stage[] downstream. Missing field is filled
- * with [DEFAULT_STAGE] before validation.
- */
 export const stageListSchema = z
   .union([stageSchema, z.array(stageSchema).min(1)])
   .transform((value) => (Array.isArray(value) ? value : [value]));
 ```
 
-- [ ] **Step 2: Verify the module type-checks in isolation**
+- [ ] **Step 2: Verify file content**
 
-The repo has no `package.json` yet (v1 has not been built). Skip compilation; verify by reading the file back and confirming there are no TODO markers, no missing exports, and the closed list matches the spec verbatim.
+Run: `sed -n '1,120p' src/stages.ts`
 
-Run: `read src/stages.ts:raw`
-Expected: file content matches what was written in Step 1, byte-for-byte.
+Expected: the file exports `STAGES` with 9 values, `REQUIRED_STAGES` with 5 values, `DEFAULT_STAGE`, `stageSchema`, and `stageListSchema`.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add src/stages.ts
-git commit -m "feat(spec): introduce closed stage vocabulary (src/stages.ts)"
+git commit -m "feat(spec): add closed lifecycle stage vocabulary"
 ```
 
 ---
 
-## Task 1: Tag `planning` plugin skills
-
-Three skills. All are tightly coupled to spec/plan phases.
+## Task 1: Tag Every Skill In Place
 
 **Files:**
-- Modify: `plugins/planning/skills/brainstorming/SKILL.md`
-- Modify: `plugins/planning/skills/spec-first-planning/SKILL.md`
-- Modify: `plugins/planning/skills/test-driven-development/SKILL.md`
 
-- [ ] **Step 1: Tag `brainstorming` as `[intent]`**
+- Modify: every `SKILL.md` listed in the Stage Assignment Table.
 
-Add `stage: [intent]` line to the frontmatter block. Preserve every existing field (`name`, `description`) and the body unchanged.
+- [ ] **Step 1: Confirm the skill count before editing**
 
-Expected frontmatter after edit:
+Run:
+
+```bash
+find plugins -path '*/node_modules/*' -prune -o -path '*.app/*' -prune -o -name SKILL.md -print | wc -l
+```
+
+Expected: `83`.
+
+- [ ] **Step 2: Add `stage` frontmatter for each skill**
+
+For every row in the Stage Assignment Table, open:
+
+```text
+plugins/<plugin>/skills/<skill>/SKILL.md
+```
+
+Insert the exact stage list from the table inside the existing YAML frontmatter block, immediately before the closing `---`.
+
+Example:
 
 ```yaml
 ---
-name: brainstorming
-description: Use before creating a feature, building a component, adding functionality, or modifying behavior - explores user intent, requirements, and design tradeoffs before any code or plan is written.
-stage: [intent]
+name: gh-fix-ci
+description: Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions.
+stage: [verify, implement]
 ---
 ```
 
-- [ ] **Step 2: Tag `spec-first-planning` as `[spec, plan]`**
+If a file already has `stage`, replace it with the table value. Preserve every other frontmatter key and the body content.
 
-Spec authoring + plan derivation both fit this skill.
+- [ ] **Step 3: Verify all 83 skills are tagged**
 
-- [ ] **Step 3: Tag `test-driven-development` as `[implement, verify]`**
-
-TDD spans writing test first (implement) and asserting it red/green (verify).
-
-- [ ] **Step 4: Spot-check by re-reading frontmatter only**
-
-For each of the three files, confirm the frontmatter still parses as YAML and that no body content was disturbed.
-
-- [ ] **Step 5: Commit**
+Run:
 
 ```bash
-git add plugins/planning/skills/
-git commit -m "feat(plugins): tag planning skills with lifecycle stages"
+node -e 'const fs=require("fs"),path=require("path");const stages=new Set(["freestyle","intent","spec","plan","explore","implement","verify","review","deliver"]);function walk(d,out=[]){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(p.includes("/node_modules/")||p.includes(".app/Contents/"))continue;if(e.isDirectory())walk(p,out);else if(e.name==="SKILL.md")out.push(p)}return out}const files=walk("plugins").sort();const bad=[];for(const f of files){const s=fs.readFileSync(f,"utf8");const m=s.match(/^---\n([\s\S]*?)\n---/);const fm=m&&m[1];const line=fm&&fm.match(/^stage:\s*\[([^\]]+)\]\s*$/m);if(!line){bad.push(`${f}: missing stage`);continue}for(const raw of line[1].split(",")){const stage=raw.trim();if(!stages.has(stage))bad.push(`${f}: invalid stage ${stage}`)}}console.log(`skills=${files.length}`);if(bad.length){console.error(bad.join("\n"));process.exit(1)}console.log("all skill stages valid")'
+```
+
+Expected:
+
+```text
+skills=83
+all skill stages valid
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add plugins
+git commit -m "feat(plugins): tag current skills with lifecycle stages"
 ```
 
 ---
 
-## Task 2: Tag `debugging` plugin skills
-
-One skill, cross-cutting.
+## Task 2: Mirror Computer Use MCP Config Into Harness Resource Layout
 
 **Files:**
-- Modify: `plugins/debugging/skills/systematic-debugging/SKILL.md`
 
-- [ ] **Step 1: Tag `systematic-debugging` as `[explore, verify]`**
+- Read: `plugins/computer-use/.mcp.json`
+- Create: `plugins/computer-use/mcp/computer-use.json`
 
-Debugging happens both when reading unknown code (explore) and when a test/assertion fails (verify).
+- [ ] **Step 1: Read the upstream MCP config**
+
+Run: `sed -n '1,120p' plugins/computer-use/.mcp.json`
+
+Expected: JSON with one `mcpServers.computer-use` entry.
+
+- [ ] **Step 2: Create the harness MCP resource**
+
+Create `plugins/computer-use/mcp/computer-use.json`:
+
+```json
+{
+  "stage": ["explore", "implement", "verify"],
+  "mcpServers": {
+    "computer-use": {
+      "command": "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
+      "args": ["mcp"],
+      "cwd": "."
+    }
+  }
+}
+```
+
+- [ ] **Step 3: Preserve the upstream metadata file**
+
+Run: `test -f plugins/computer-use/.mcp.json`
+
+Expected: command exits 0. Do not delete or move `.mcp.json`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add plugins/computer-use/mcp/computer-use.json
+git commit -m "feat(plugins): mirror computer-use mcp config for stage indexing"
+```
+
+---
+
+## Task 3: Record The Plugin Stage Matrix In The Inventory
+
+**Files:**
+
+- Modify: `plugins/INDEX.md`
+
+- [ ] **Step 1: Replace the current raw inventory table with a staged inventory**
+
+Keep the opening title. Replace the body with these sections:
+
+```markdown
+This inventory is the current source snapshot for harness-kit plugin resources.
+Skills stay under their owning plugin; stages are retrieval and coverage
+metadata.
+
+## Resource Counts
+
+| Resource | Count | Notes |
+|---|---:|---|
+| Skills | 83 | Every `SKILL.md` has explicit `stage` frontmatter. |
+| Skill-local agents | 39 | `skills/<skill>/agents/openai.yaml`; inherits parent skill stage. |
+| Top-level hooks | 0 | No `plugins/*/hooks/*` resources currently exist. |
+| Top-level agents | 0 | No `plugins/*/agents/<name>.md` resources currently exist. |
+| MCP resources | 1 | `computer-use`; indexed, not coverage-eligible. |
+
+## Coverage Summary
+
+| Stage | Coverage-eligible plugins |
+|---|---|
+| `intent` | `planning`, `codex-user-skills`, `superpowers` |
+| `spec` | `backend`, `codex-security`, `codex-system-skills`, `codex-user-skills`, `planning`, `security-review`, `superpowers` |
+| `plan` | `planning`, `superpowers` |
+| `explore` | `browser`, `codex-security`, `codex-system-skills`, `codex-user-skills`, `computer-use`, `debugging`, `github`, `security-review`, `superpowers` |
+| `implement` | `backend`, `codex-security`, `codex-system-skills`, `codex-user-skills`, `computer-use`, `delivery`, `documents`, `frontend`, `github`, `planning`, `presentations`, `security-review`, `spreadsheets`, `superpowers` |
+| `verify` | `backend`, `browser`, `codex-security`, `codex-system-skills`, `codex-user-skills`, `computer-use`, `debugging`, `delivery`, `documents`, `frontend`, `github`, `planning`, `presentations`, `security-review`, `spreadsheets`, `superpowers` |
+| `review` | `codex-security`, `codex-user-skills`, `delivery`, `github`, `security-review`, `superpowers` |
+| `deliver` | `codex-user-skills`, `delivery`, `documents`, `github`, `presentations`, `spreadsheets`, `superpowers` |
+| `freestyle` | `codex-user-skills`, `superpowers` |
+
+## Full Assignment Table
+
+Use the assignment table in `.harness/docs/superpowers/plans/2026-05-26-plugin-stage-matrix.md` as the canonical edit list for this migration.
+```
 
 - [ ] **Step 2: Commit**
 
 ```bash
-git add plugins/debugging/skills/
-git commit -m "feat(plugins): tag debugging skill with lifecycle stages"
+git add plugins/INDEX.md
+git commit -m "docs(plugins): record current plugin stage matrix"
 ```
 
 ---
 
-## Task 3: Tag `frontend` plugin skills
-
-Three skills. Implementation, polish, and audit each map to one stage.
+## Task 4: Update Cross-Reference Documentation
 
 **Files:**
-- Modify: `plugins/frontend/skills/frontend-implementation/SKILL.md`
-- Modify: `plugins/frontend/skills/frontend-polish/SKILL.md`
-- Modify: `plugins/frontend/skills/accessibility-audit/SKILL.md`
 
-- [ ] **Step 1: Tag `frontend-implementation` as `[implement]`**
-
-- [ ] **Step 2: Tag `frontend-polish` as `[implement]`**
-
-Polish is a second pass within the implement stage, not a separate lifecycle phase.
-
-- [ ] **Step 3: Tag `accessibility-audit` as `[verify]`**
-
-A11y audit is a check on a built UI, sits with verification.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add plugins/frontend/skills/
-git commit -m "feat(plugins): tag frontend skills with lifecycle stages"
-```
-
----
-
-## Task 4: Tag `backend` plugin skills
-
-Three skills.
-
-**Files:**
-- Modify: `plugins/backend/skills/api-design/SKILL.md`
-- Modify: `plugins/backend/skills/backend-change/SKILL.md`
-- Modify: `plugins/backend/skills/data-integrity/SKILL.md`
-
-- [ ] **Step 1: Tag `api-design` as `[spec, implement]`**
-
-API design straddles formal spec writing and the actual route/handler implementation.
-
-- [ ] **Step 2: Tag `backend-change` as `[implement]`**
-
-- [ ] **Step 3: Tag `data-integrity` as `[implement, verify]`**
-
-Schema migrations need both writing code and asserting invariants post-change.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add plugins/backend/skills/
-git commit -m "feat(plugins): tag backend skills with lifecycle stages"
-```
-
----
-
-## Task 5: Tag `delivery` plugin skills
-
-Five skills covering the back half of the lifecycle.
-
-**Files:**
-- Modify: `plugins/delivery/skills/code-review/SKILL.md`
-- Modify: `plugins/delivery/skills/requesting-code-review/SKILL.md`
-- Modify: `plugins/delivery/skills/receiving-code-review/SKILL.md`
-- Modify: `plugins/delivery/skills/verification-before-completion/SKILL.md`
-- Modify: `plugins/delivery/skills/finishing-branch/SKILL.md`
-
-- [ ] **Step 1: Tag `code-review` as `[review]`**
-
-- [ ] **Step 2: Tag `requesting-code-review` as `[review]`**
-
-- [ ] **Step 3: Tag `receiving-code-review` as `[review]`**
-
-- [ ] **Step 4: Tag `verification-before-completion` as `[verify]`**
-
-- [ ] **Step 5: Tag `finishing-branch` as `[deliver]`**
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add plugins/delivery/skills/
-git commit -m "feat(plugins): tag delivery skills with lifecycle stages"
-```
-
----
-
-## Task 6: Tag `security-review` plugin skills
-
-Three skills.
-
-**Files:**
-- Modify: `plugins/security-review/skills/threat-model/SKILL.md`
-- Modify: `plugins/security-review/skills/security-scan/SKILL.md`
-- Modify: `plugins/security-review/skills/fix-security-finding/SKILL.md`
-
-- [ ] **Step 1: Tag `threat-model` as `[spec]`**
-
-Threat modeling produces a design-level artifact, lives in the spec stage.
-
-- [ ] **Step 2: Tag `security-scan` as `[verify, review]`**
-
-Scans are both an automated verification and a review input.
-
-- [ ] **Step 3: Tag `fix-security-finding` as `[implement]`**
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add plugins/security-review/skills/
-git commit -m "feat(plugins): tag security-review skills with lifecycle stages"
-```
-
----
-
-## Task 7: Audit coverage of the `nextjs` preset
-
-A manual audit, mirroring what the future compiler's coverage check will produce. Confirms that the stage assignments in Tasks 1–6 actually produce a complete preset.
-
-**Files:** none modified (read-only).
-
-- [ ] **Step 1: List enabled plugins for `preset: nextjs`**
-
-Per spec, `nextjs` expands to `["superpowers", "code-review", "nextjs"]`. The on-disk plugin set differs: `planning` plays the `superpowers` role, `delivery` plays the `code-review` role, and `nextjs` is the (planned but not yet on disk) stack plugin.
-
-Working set for this audit: `["planning", "delivery", "debugging", "backend", "frontend", "security-review"]` (everything currently on disk that a Next.js project would enable; the planned `nextjs` stack plugin ships docs+permissions only and contributes nothing to the matrix).
-
-- [ ] **Step 2: Compute the matrix column for each required stage**
-
-Read each tagged SKILL.md and group by stage:
-
-| Stage | Cells (`plugin · skill`) | Required? | OK? |
-|---|---|---|---|
-| `intent` | `planning · brainstorming` | yes | yes |
-| `plan` | `planning · spec-first-planning` | yes | yes |
-| `implement` | `planning · test-driven-development` · `frontend · frontend-implementation` · `frontend · frontend-polish` · `backend · backend-change` · `backend · api-design` · `backend · data-integrity` · `security-review · fix-security-finding` | yes | yes |
-| `verify` | `planning · test-driven-development` · `debugging · systematic-debugging` · `frontend · accessibility-audit` · `backend · data-integrity` · `delivery · verification-before-completion` · `security-review · security-scan` | yes | yes |
-| `deliver` | `delivery · finishing-branch` | yes | yes |
-
-Optional stages: `spec` gets `planning · spec-first-planning`, `backend · api-design`, `security-review · threat-model`; `explore` gets `debugging · systematic-debugging`; `review` gets all three `delivery` review skills plus `security-review · security-scan`; `freestyle` empty (acceptable).
-
-- [ ] **Step 3: Record the audit result**
-
-Append a short table to the matrix spec under a new "Audit Results" appendix, capturing the table from Step 2 as the baseline. Future spec/skill changes can diff against this baseline.
-
-File to modify: `.harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`
-
-Add at the end of the file, before any new section:
-
-```markdown
-## Appendix A — Baseline Coverage Audit (2026-05-26)
-
-Working preset: on-disk plugins as of this spec date (`planning`, `delivery`,
-`debugging`, `backend`, `frontend`, `security-review`).
-
-| Stage | Cells | Required? | OK? |
-| ... (paste table from Step 2)
-```
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add .harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md
-git commit -m "docs(spec): record baseline stage-coverage audit for nextjs preset"
-```
-
----
-
-## Task 8: Extend the schema spec with workflows/, mcp/, and forward-reference
-
-Make the prior schema spec point forward to the matrix spec, and absorb the plugin sub-directory broadening so a reader of the schema spec alone is not misled.
-
-**Files:**
 - Modify: `.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`
-
-- [ ] **Step 1: Add a "Supersession Note" near the top**
-
-Insert immediately after the existing `Status:` line:
-
-```markdown
-> **Extended (2026-05-26).** Plugin sub-directory list broadens from 5 to 7
-> kinds (`workflows/` and `mcp/` added). `extras` gains `workflows` and `mcp`
-> namespaces. Every resource gains a `stage` frontmatter field with a closed
-> 9-value vocabulary. Full details in
-> [`2026-05-26-plugin-stage-matrix-design.md`](2026-05-26-plugin-stage-matrix-design.md).
-> This document remains the source of truth for yaml shape, preset semantics,
-> and resolution flow.
-```
-
-- [ ] **Step 2: Broaden the plugin directory layout block**
-
-Find the existing `plugins/<plugin>/` tree (under "Plugin directory layout") and add two rows so it reads:
-
-```
-plugins/<plugin>/
-  README.md                                # required
-  skills/<name>/SKILL.md                   # optional, 0..N
-  agents/<name>.md                         # optional, 0..N
-  hooks/<name>.json                        # optional, 0..N
-  workflows/<name>.md                      # optional, 0..N  (added 2026-05-26)
-  mcp/<name>.json                          # optional, 0..N  (added 2026-05-26)
-  docs/<name>/{manifest.ts, template.md}   # optional, 0..N
-  permissions.json                         # optional, 0..1
-```
-
-- [ ] **Step 3: Broaden the "Plugin contribution → output mapping" table**
-
-Append two rows to the table:
-
-| Source inside a plugin | Output destination |
-|---|---|
-| `workflows/<name>.md` | copied to `<outDir>/workflows/<plugin>-<name>.md` |
-| `mcp/<name>.json` | merged across all enabled plugins into `<outDir>/mcp/config.json` |
-
-- [ ] **Step 4: Extend the `Extras` zod schema in §"Zod Schema (v1)"**
-
-Add two fields to the `Extras` object:
-
-```ts
-const Extras = z.object({
-  plugins:   z.array(z.string()).default([]),
-  skills:    z.array(z.string()).default([]),
-  agents:    z.array(z.string()).default([]),
-  hooks:     z.array(z.string()).default([]),
-  workflows: z.array(z.string()).default([]),  // added 2026-05-26
-  mcp:       z.array(z.string()).default([]),  // added 2026-05-26
-}).partial();
-```
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add .harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md
-git commit -m "docs(spec): extend schema with workflows/mcp dirs and stage forward-ref"
-```
-
----
-
-## Task 9: Refresh ARCHITECTURE.md with the matrix view
-
-The current architecture doc describes a linear pipeline. Replace the resolve step's prose with a matrix description and add a Matrix section.
-
-**Files:**
 - Modify: `.harness/ARCHITECTURE.md`
-
-- [ ] **Step 1: Edit the high-level pipeline block**
-
-Inside the `resolve` block of the existing ASCII pipeline (lines that read `preset -> plugin id list ... resolve references`), add one line after the existing references step:
-
-```
- |   fill plugin × stage matrix from frontmatter        |
-```
-
-- [ ] **Step 2: Add a "Matrix IR" subsection right after "Core Flow"**
-
-Insert a new H2:
-
-```markdown
-## Matrix IR
-
-After `resolve`, the compiler holds a sparse `plugin × stage` matrix. Plugins
-are the unit of distribution; stages are the unit of lifecycle. The matrix is
-the single source of truth for `render` and `emit`; downstream phases do not
-re-walk plugin source directories.
-
-Stage vocabulary is closed and defined in `src/stages.ts`. Coverage is checked
-against the five required stages (`intent`, `plan`, `implement`, `verify`,
-`deliver`); missing coverage emits a build-time warning.
-
-Full model: [`docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`](docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md).
-```
-
-- [ ] **Step 3: Extend the "Plugin" entity table to mention `stage`**
-
-In the existing plugin sub-resources table (the one under "### Plugin"), add a single sentence after the table:
-
-```markdown
-Every skill / hook / workflow / agent / MCP file declares a `stage` in its
-frontmatter (default `[freestyle]`). The compiler uses this to build the
-matrix; see the Matrix IR section.
-```
-
-- [ ] **Step 4: Add `workflows/` and `mcp/` rows to the plugin sub-resources table**
-
-Match the additions from Task 8 Step 3.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add .harness/ARCHITECTURE.md
-git commit -m "docs(arch): introduce matrix IR; add workflows/mcp plugin sub-dirs"
-```
-
----
-
-## Task 10: Update AGENTS.md content-pool section
-
-Add the stage-tagging rule and the new module to the planned implementation structure.
-
-**Files:**
 - Modify: `.harness/AGENTS.md`
 
-- [ ] **Step 1: Add a "Stage Tagging" subsection under "Operating Rules"**
+- [ ] **Step 1: Extend the schema spec**
 
-Insert before the existing "## Security Requirements" section:
+Add a note near the top of `.harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md`:
 
 ```markdown
-## Stage Tagging
-
-Every resource a plugin ships (`skills/<name>/SKILL.md`,
-`hooks/<name>.json`, `workflows/<name>.md`, `agents/<name>.md`,
-`mcp/<name>.json`) declares one or more lifecycle stages in its frontmatter
-or top-level JSON field:
-
-    stage: [intent | plan | spec | explore | implement | verify | review | deliver | freestyle]
-
-The vocabulary is closed and lives in `src/stages.ts`. Missing field defaults
-to `[freestyle]`. See
-[`docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md`](docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md).
+> **Extended by the plugin-stage matrix spec (2026-05-26).** Plugin resources
+> carry closed lifecycle-stage metadata. Plugin source layout now also accepts
+> `workflows/<name>.md` and `mcp/<name>.json`; `extras` accepts `workflows`
+> and `mcp` selectors. The yaml selection model remains plugin-owned.
 ```
 
-- [ ] **Step 2: Add `src/stages.ts` to the "Planned repo implementation structure" tree**
+Update its plugin layout and extras schema to include `workflows` and `mcp`.
 
-In the existing tree under "Planned repo implementation structure", add `stages.ts` next to `compile.ts`:
+- [ ] **Step 2: Update architecture docs**
 
+In `.harness/ARCHITECTURE.md`, add a `Matrix IR` section stating:
+
+```markdown
+After resolve, the compiler holds a sparse plugin x stage matrix. Plugins are
+the unit of distribution; stages are the unit of lifecycle retrieval and
+coverage. Render and emit consume the matrix instead of walking plugin source
+directories again.
 ```
-src/
-  compile.ts
-  stages.ts        # closed stage vocabulary; imported by zod schemas
+
+- [ ] **Step 3: Update agent guidance**
+
+In `.harness/AGENTS.md`, add a `Stage Tagging` subsection:
+
+```markdown
+Every stage-indexed plugin resource declares one or more lifecycle stages from
+`src/stages.ts`. Skills declare stages in `SKILL.md` frontmatter. Skill-local
+`agents/openai.yaml` files inherit their parent skill stage. MCP resources are
+stage-indexed for retrieval but do not satisfy coverage.
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add .harness/AGENTS.md
-git commit -m "docs(agents): document stage-tagging rule and src/stages.ts"
+git add .harness/docs/superpowers/specs/2026-05-25-harness-yaml-schema-design.md .harness/ARCHITECTURE.md .harness/AGENTS.md
+git commit -m "docs(harness): cross-reference plugin stage matrix model"
 ```
 
 ---
 
-## Task 11: Final cross-document sanity sweep
+## Task 5: Final Verification
 
-Confirm that the three primary documents — schema spec, matrix spec, ARCHITECTURE.md — are mutually consistent and that every plugin source file actually carries a `stage` field.
+**Files:** read-only verification.
 
-**Files:** none modified (read-only verification).
+- [ ] **Step 1: Verify every skill has valid stage frontmatter**
 
-- [ ] **Step 1: Confirm every `plugins/*/skills/*/SKILL.md` has `stage`**
+Run the Node validation command from Task 1 Step 3.
 
-Run a search: `search "stage:" plugins/`
+Expected:
 
-Expected: at least one match per skill file listed in the File Structure section above. If any file lacks `stage`, return to the relevant Task (1–6) and finish it.
+```text
+skills=83
+all skill stages valid
+```
 
-- [ ] **Step 2: Confirm the closed vocabulary appears verbatim in `src/stages.ts`**
+- [ ] **Step 2: Verify skill-local agents are preserved**
 
-Run: `read src/stages.ts:raw`
-
-Expected: `STAGES` array contains exactly the 9 strings in the order `freestyle, intent, plan, spec, explore, implement, verify, review, deliver`. `REQUIRED_STAGES` contains exactly 5 strings.
-
-- [ ] **Step 3: Confirm both specs cross-reference each other**
-
-- Schema spec (`2026-05-25-harness-yaml-schema-design.md`) has the "Extended (2026-05-26)" note pointing at the matrix spec.
-- Matrix spec (`2026-05-26-plugin-stage-matrix-design.md`) has its "Extends:" line pointing at the schema spec.
-- `ARCHITECTURE.md` has a "Matrix IR" section pointing at the matrix spec.
-- `AGENTS.md` has a "Stage Tagging" subsection pointing at the matrix spec.
-
-- [ ] **Step 4: Confirm baseline coverage audit table is present**
-
-Read `.harness/docs/superpowers/specs/2026-05-26-plugin-stage-matrix-design.md` and confirm "Appendix A — Baseline Coverage Audit" exists with all five required stages marked `OK? yes`.
-
-- [ ] **Step 5: Commit final summary**
-
-If any document needed a fix in Steps 1–4, commit those fixes here. Otherwise this task closes with a no-op verification record:
+Run:
 
 ```bash
-git commit --allow-empty -m "docs(verify): confirm matrix-spec cross-references are consistent"
+find plugins -path '*/node_modules/*' -prune -o -path '*.app/*' -prune -o -path '*/agents/openai.yaml' -print | wc -l
 ```
+
+Expected: `39`.
+
+- [ ] **Step 3: Verify no top-level hooks currently exist**
+
+Run:
+
+```bash
+find plugins -path '*/node_modules/*' -prune -o -path '*.app/*' -prune -o -path '*/hooks/*' -type f -print | wc -l
+```
+
+Expected: `0`.
+
+- [ ] **Step 4: Verify MCP mirror exists and upstream MCP metadata remains**
+
+Run:
+
+```bash
+test -f plugins/computer-use/.mcp.json && test -f plugins/computer-use/mcp/computer-use.json
+```
+
+Expected: command exits 0.
+
+- [ ] **Step 5: Verify required-stage coverage from tagged skills**
+
+Run:
+
+```bash
+node -e 'const fs=require("fs"),path=require("path");const required=["intent","plan","implement","verify","deliver"];function walk(d,out=[]){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(p.includes("/node_modules/")||p.includes(".app/Contents/"))continue;if(e.isDirectory())walk(p,out);else if(e.name==="SKILL.md")out.push(p)}return out}const coverage=Object.fromEntries(required.map(s=>[s,new Set()]));for(const f of walk("plugins")){const parts=f.split(path.sep);const plugin=parts[1];const s=fs.readFileSync(f,"utf8");const line=s.match(/^stage:\s*\[([^\]]+)\]\s*$/m);if(!line)continue;for(const stage of line[1].split(",").map(x=>x.trim()))if(coverage[stage])coverage[stage].add(plugin)}for(const stage of required)console.log(`${stage}: ${[...coverage[stage]].sort().join(", ")}`);if(required.some(stage=>coverage[stage].size===0))process.exit(1)'
+```
+
+Expected: every required stage prints at least one plugin name.
+
+- [ ] **Step 6: Commit final verification note if needed**
+
+If verification required documentation fixes, commit them:
+
+```bash
+git add .harness plugins src
+git commit -m "docs(verify): confirm current plugin stage matrix coverage"
+```
+
+If there were no fixes after Task 4, do not create an empty commit.
 
 ---
 
 ## Acceptance Criterion
 
-```
-- src/stages.ts exists, exports STAGES (length 9), REQUIRED_STAGES (length 5),
-  DEFAULT_STAGE = "freestyle", and stageSchema + stageListSchema.
-- Every existing plugins/*/skills/*/SKILL.md carries a `stage:` frontmatter
-  field whose values are drawn from STAGES.
-- 2026-05-25-harness-yaml-schema-design.md has the extension note, the
-  broadened plugin sub-directory list, the workflows/+mcp/ output rows, and
-  the extended Extras zod schema.
-- 2026-05-26-plugin-stage-matrix-design.md has Appendix A populated with
-  the baseline coverage audit.
-- ARCHITECTURE.md has a Matrix IR section.
-- AGENTS.md has a Stage Tagging subsection.
-- All five REQUIRED_STAGES are covered by at least one cell for the
-  on-disk plugin set.
-```
+- `src/stages.ts` exists and exports the closed 9-stage vocabulary in display order: `freestyle`, `intent`, `spec`, `plan`, `explore`, `implement`, `verify`, `review`, `deliver`.
+- Every current non-vendored `plugins/**/skills/**/SKILL.md` has explicit valid `stage: [...]` frontmatter.
+- No skill has moved out of its owning plugin.
+- All 39 skill-local `agents/openai.yaml` files remain in place and inherit parent skill stage.
+- `plugins/computer-use/mcp/computer-use.json` exists with stage metadata, while `plugins/computer-use/.mcp.json` is preserved.
+- `plugins/INDEX.md` records resource counts and the plugin x stage coverage table.
+- `.harness/AGENTS.md`, `.harness/ARCHITECTURE.md`, and the schema spec cross-reference the plugin-stage matrix model.
+- Required stages `intent`, `plan`, `implement`, `verify`, and `deliver` each have at least one coverage-eligible skill in the current inventory.
 
-When all the above hold, this plan ships. The next plan (v1 compiler rewrite, to be authored separately via `superpowers:writing-plans`) consumes this output: it implements `resolve()` to fill the matrix, `render()` to project to disk, and `emit()` to write `manifest.json` + `stages/<stage>/index.md`.
-
----
-
-## Out of Scope (this plan)
-
-- Compiler code beyond `src/stages.ts`. The matrix IR, resolver matrix-fill, coverage check, and `manifest.json` / `stages/` emission all belong in the v1-rewrite plan.
-- Updating the `harness-kit-example/nextjs-acme/.harness/` hand-curated target to include `manifest.json` or `stages/`. That target is refreshed when the compiler can actually emit those files.
-- Tagging hooks, workflows, agents, or MCP files. No plugin ships any of these on disk today; tagging happens at the same commit as their introduction.
-- Authoring the planned `nextjs` stack plugin. It belongs in the compiler-implementation plan.
-- Renaming the `superpowers` / `code-review` plugin ids in the preset hardcode. The on-disk plugin layout already differs from preset expansion; reconciliation happens in the v1-rewrite plan.
-- Building a CI gate that fails on coverage warnings. Coverage runs at compile time only; CI gating is a post-MVP feature.
+When all criteria hold, the matrix metadata migration is complete. A later compiler plan can consume this state to implement `manifest.json` and `stages/<stage>/index.md` emission.

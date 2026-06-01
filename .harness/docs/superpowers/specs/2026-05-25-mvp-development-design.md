@@ -1,8 +1,15 @@
 # harness-kit MVP v0 — Design Spec
 
 Date: 2026-05-25
-Status: draft, pending user review
+Status: deprecated
 Scope: minimal `yaml → .harness/` compiler. No CLI, no watch, no check mode.
+
+> **DEPRECATED — historical only.** Do not execute or extend this v0 design.
+> It uses the old pool model (`docs-pool`, `catalog`, `skills-pool`,
+> `references-pool`, and related resource pools). Current work targets compiler v1, where
+> plugins are first-class and the minimal prototype lives in `src/compile.ts`.
+> See
+> [`2026-05-27-yaml-to-harness-compiler-v1-design.md`](2026-05-27-yaml-to-harness-compiler-v1-design.md).
 
 ## Goal
 

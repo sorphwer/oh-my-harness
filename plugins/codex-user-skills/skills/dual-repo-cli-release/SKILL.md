@@ -1,6 +1,7 @@
 ---
 name: dual-repo-cli-release
 description: Use when building a Python CLI that ships as standalone binaries (no Python required on user machines), needs curl|sh install and self-update, and wants to keep source code private while publishing binaries publicly
+stage: [spec, implement, deliver]
 ---
 
 # Dual-Repo CLI Release Pipeline

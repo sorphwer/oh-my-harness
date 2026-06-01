@@ -1,18 +1,23 @@
 # UAT Checklist
 
-This checklist defines the acceptance pass for harness-kit MVP v0.
+This checklist defines the acceptance pass for the harness-kit compiler v1
+minimal prototype.
 
 ## Current Context
 
 - Validating: minimal `yaml -> .harness/` compiler.
-- Target fixture: `example/nextjs-acme`.
-- Root `.harness/`: hand-bootstrapped for this project and not yet generated.
+- Root manifest: `harness.yaml`.
+- Fixture manifest: `harness-kit-example/compiler-v1/harness.yaml`.
+- Generated run location: `outputs/.harness-<YYYYMMDD-HHMMSS>-<hash4>`.
+- Root `.harness/`: hand-maintained for this project; not overwritten during
+  prototype smoke tests.
 
 ## Preconditions
 
-- `package.json` exists with required TypeScript, test, and compiler dependencies.
-- `example/nextjs-acme/harness.yaml` exists.
-- `example/nextjs-acme/.harness/` contains the hand-curated target files.
+- `package.json` exists with TypeScript, test, yaml, zod, tsx, and vitest dependencies.
+- `.harness/templates/` contains the 11 fixed template files.
+- root `harness.yaml` exists.
+- `harness-kit-example/compiler-v1/harness.yaml` exists.
 - The active spec and plan exist under `.harness/docs/superpowers/`.
 
 ## Compiler Acceptance
@@ -21,50 +26,66 @@ This checklist defines the acceptance pass for harness-kit MVP v0.
 
 - [ ] Valid yaml parses successfully.
 - [ ] Invalid yaml syntax fails with the yaml path.
-- [ ] Schema errors include the relevant field path.
+- [ ] Schema errors include useful validation context.
 
 ### 2. Resolve
 
-- [ ] Known docs resolve to doc-pool fragments.
-- [ ] Known skills resolve to catalog entries.
-- [ ] Known references resolve to reference-pool files.
-- [ ] Unknown ids fail without fallback behavior.
+- [ ] Known plugin ids resolve to directories under `plugins/`.
+- [ ] Unknown plugin ids fail without fallback behavior.
+- [ ] All 11 fixed templates are required.
 
 ### 3. Render
 
-- [ ] `AGENTS.md`, `ARCHITECTURE.md`, `docs/PLANS.md`, and `docs/PRODUCT_SENSE.md` render from templates.
-- [ ] `SKILLS.md` is composed from selected catalog entries.
-- [ ] References are copied byte-for-byte.
-- [ ] Permissions preset writes `.claude/settings.example.json`.
+- [ ] `AGENTS.md` is copied from `.harness/templates/AGENTS.md`.
+- [ ] `ARCHITECTURE.md` is copied from `.harness/templates/ARCHITECTURE.md`.
+- [ ] The 9 docs under `docs/` are copied from `.harness/templates/docs/`.
+- [ ] `PLUGINS.md` lists yaml-selected plugins in yaml order.
 
 ### 4. Emit
 
-- [ ] Output directory is created if missing.
+- [ ] A timestamped run directory is created under `outputs/`.
 - [ ] Parent directories are created as needed.
-- [ ] Emitted paths stay under `outDir`.
-- [ ] Pre-existing unrelated files are left untouched.
+- [ ] Emitted paths stay under the generated run directory.
+- [ ] Pre-existing unrelated files in `outputs/` are left untouched.
+- [ ] No `.claude` or `docs/references` output is produced in compiler v1.
 
 ## Fixture Acceptance
 
-- [ ] Compiling `example/nextjs-acme/harness.yaml` into a temp directory passes the subset comparison.
-- [ ] Every emitted file exists in `example/nextjs-acme/.harness/`.
-- [ ] Every emitted file is byte-equal to the target version.
-- [ ] No feature outside v0 is required for the fixture to pass.
+- [ ] `npm test` passes.
+- [ ] The direct `npx tsx src/compile.ts ...` test passes.
+- [ ] Generated fixed docs are byte-equal to `.harness/templates/`.
+- [ ] Unknown plugin id fails before generated output is emitted.
+
+## Smoke Acceptance
+
+Run:
+
+```bash
+npx tsx src/compile.ts harness.yaml
+find outputs/.harness-YYYYMMDD-HHMMSS-xxxx -maxdepth 3 -type f | sort
+```
+
+Expected:
+
+- 11 fixed harness docs are present.
+- `PLUGINS.md` is present.
+- `PLUGINS.md` lists `planning`, `delivery`, and `debugging`.
 
 ## Documentation Acceptance
 
-- [ ] README, repo guide, spec, and plan agree that v0 has no CLI, watch, check, packaging, or LLM frontend.
+- [ ] README, repo guide, architecture, product, plan, quality, security,
+  operations, reliability, and UAT docs agree on compiler v1 scope.
 - [ ] User-facing copy describes harness-kit as doc-led and compiler-driven.
-- [ ] No generated or filled harness doc contains unresolved placeholders.
-- [ ] Root `.harness/docs/superpowers/` contains the current MVP spec and plan.
+- [ ] Template docs contain no unresolved `TODO`, `TBD`, or variable markers.
+- [ ] Root `.harness/docs/superpowers/` contains the current compiler v1 spec and plan.
 
 ## Exit Criteria
 
-MVP v0 is shippable when:
+Compiler v1 minimal prototype is acceptable when:
 
 - [ ] `npm test` passes.
-- [ ] The fixture output is deterministic across repeated runs.
-- [ ] The compiler does not reach the network or call an LLM.
-- [ ] The compiler rejects unsafe output paths.
-- [ ] The v0 scope remains limited to the planned compiler function and fixture.
-
+- [ ] `npm run typecheck` passes.
+- [ ] root `harness.yaml` compiles into `outputs/.harness-<YYYYMMDD-HHMMSS>-<hash4>`.
+- [ ] the compiler does not reach the network or call an LLM.
+- [ ] the compiler rejects unsafe output paths.
+- [ ] the scope remains limited to fixed templates plus plugin inventory.

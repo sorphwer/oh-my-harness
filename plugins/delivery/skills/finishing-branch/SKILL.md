@@ -1,6 +1,7 @@
 ---
 name: finishing-branch
 description: Use when implementation is complete and tests pass, before merging or opening a PR - guides the integration decision instead of defaulting to "just merge it".
+stage: [deliver]
 ---
 
 # Finishing a Development Branch

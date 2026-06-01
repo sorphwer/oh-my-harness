@@ -1,6 +1,7 @@
 ---
 name: use-json-render-cli
 description: Render structured JSON UI specs to PNG images with json-render-cli. Use when users ask to generate visual outputs such as compact tables, ticket status tables, KPI/info cards, announcement cards, or flow/timeline summaries, and route to the matching use-case reference under references/.
+stage: [implement, verify, deliver]
 ---
 
 # Use JSON Render CLI

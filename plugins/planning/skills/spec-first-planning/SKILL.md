@@ -1,6 +1,7 @@
 ---
 name: spec-first-planning
 description: Use when non-trivial work needs a design spec, implementation plan, sequencing, acceptance criteria, or handoff document before code changes.
+stage: [spec, plan]
 ---
 
 # Spec First Planning

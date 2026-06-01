@@ -1,6 +1,7 @@
 ---
 name: security-scan
 description: Use when performing a full security review of a repository, branch, pull request, commit, or patch where threat model, findings, validation, and severity need to be reported.
+stage: [spec, explore, verify, review]
 ---
 
 # Security Scan

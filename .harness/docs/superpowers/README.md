@@ -23,7 +23,7 @@ This folder holds two kinds of long-form planning documents. They are not interc
 | Form | Prose + tables + zod / TS signatures + ASCII diagrams | `## Task N` blocks + concrete commands and edits |
 | Authoring skill | `superpowers:brainstorming` → `superpowers:spec-first-planning` | `superpowers:writing-plans` |
 | Execution skill | None — humans review the design | `superpowers:executing-plans` or `superpowers:subagent-driven-development` |
-| Lifecycle | Long-lived; extended or superseded by later specs | Consumed once; marked `SUPERSEDED` or `NEEDS REWRITE` after execution |
+| Lifecycle | Long-lived; extended or superseded by later specs | Consumed once; marked `implemented`, `SUPERSEDED`, or `NEEDS REWRITE` after execution |
 | Variable that triggers update | Requirements, constraints, or invariants changed | Repo state changed (files renamed, deps moved, deferred task picked up) |
 | Cost of being wrong | Architectural debt; expensive to undo | Local rework; cheap to fix |
 
@@ -138,7 +138,7 @@ writing-plans        ─►  plans/YYYY-MM-DD-<topic>.md          ← plan stage
                           implement + verify + deliver
                               │
                               ▼
-                          plan marked SUPERSEDED or archived
+                          plan marked implemented, SUPERSEDED, or archived
                           spec stays canonical until extended/superseded
 ```
 
@@ -159,4 +159,4 @@ The `plugins/planning/` plugin ships the skills that produce these documents:
 - `skills/spec-first-planning` — turn shared understanding into a spec.
 - `skills/test-driven-development` — execution discipline once a plan is being implemented.
 
-The `writing-plans`, `executing-plans`, and `subagent-driven-development` skills live in the upstream `superpowers` plugin and are picked up via the `nextjs` preset.
+The `writing-plans`, `executing-plans`, and `subagent-driven-development` skills live in the upstream `superpowers` plugin. In this repo they are discovered through the current harness/plugin inventory, not a project preset.

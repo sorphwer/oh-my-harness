@@ -1,6 +1,7 @@
 ---
 name: discord-js
 description: Build, debug, and refactor Discord bots and integrations with discord.js and official discord.js.org docs. Use when tasks involve slash commands, events, interactions (buttons, select menus, modals), embeds, permissions or intents, gateway/client lifecycle, message utilities, REST command registration, or Discord bot version migration in Node.js/TypeScript projects.
+stage: [spec, implement, verify]
 ---
 
 # Discord.js Workflow

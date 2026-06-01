@@ -1,6 +1,7 @@
 ---
 name: receiving-code-review
 description: Use when reading review feedback, before implementing suggestions - requires technical verification, not performative agreement or blind compliance.
+stage: [review, implement]
 ---
 
 # Receiving Code Review

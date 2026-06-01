@@ -2,6 +2,7 @@
 name: i-colorize
 description: Add strategic color to features that are too monochromatic or lack visual interest. Makes interfaces more engaging and expressive.
 argument-hint: [TARGET=<value>]
+stage: [implement]
 ---
 
 Strategically introduce color to designs that are too monochromatic, gray, or lacking in visual warmth and personality.

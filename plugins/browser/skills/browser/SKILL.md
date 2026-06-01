@@ -1,6 +1,7 @@
 ---
 name: browser
 description: "Browser automation for the Codex in-app browser. Use to open, navigate, inspect, test, click, type, screenshot, or verify local targets such as localhost, 127.0.0.1, ::1, file://, the current in-app browser tab, and websites shown side by side inside Codex."
+stage: [explore, verify]
 ---
 
 # Browser

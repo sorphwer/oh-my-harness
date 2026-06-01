@@ -1,0 +1,5 @@
+name: compiler-v1-fixture
+displayName: Compiler v1 Fixture
+plugins:
+  - planning
+  - delivery

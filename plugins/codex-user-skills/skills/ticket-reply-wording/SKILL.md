@@ -1,6 +1,7 @@
 ---
 name: ticket-reply-wording
 description: Use when polishing a support ticket reply from a raw solution or conclusion into Riino's writing style. Triggers when user asks to draft, polish, or reword a ticket response.
+stage: [deliver]
 ---
 
 # Ticket Reply Wording

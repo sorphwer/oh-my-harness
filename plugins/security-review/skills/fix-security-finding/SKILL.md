@@ -1,6 +1,7 @@
 ---
 name: fix-security-finding
 description: Use when fixing a validated or plausible security finding in code, configuration, tests, or generated output.
+stage: [implement, verify]
 ---
 
 # Fix Security Finding

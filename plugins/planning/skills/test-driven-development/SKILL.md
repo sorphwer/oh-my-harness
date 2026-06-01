@@ -1,6 +1,7 @@
 ---
 name: test-driven-development
 description: Use when implementing a feature or bugfix where behavior can be specified with tests before production code changes.
+stage: [implement, verify]
 ---
 
 # Test Driven Development

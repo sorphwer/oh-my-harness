@@ -1,6 +1,7 @@
 ---
 name: systematic-debugging
 description: Use when encountering a bug, test failure, regression, or unexpected behavior, before proposing a fix.
+stage: [explore, verify]
 ---
 
 # Systematic Debugging

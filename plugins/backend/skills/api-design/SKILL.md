@@ -1,6 +1,7 @@
 ---
 name: api-design
 description: Use when designing, reviewing, or refactoring backend APIs, REST resources, RPC methods, OpenAPI specs, protobufs, or external integration contracts.
+stage: [spec, implement]
 ---
 
 # API Design

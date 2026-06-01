@@ -2,6 +2,7 @@
 name: i-delight
 description: Add moments of joy, personality, and unexpected touches that make interfaces memorable and enjoyable to use. Elevates functional to delightful.
 argument-hint: [TARGET=<value>]
+stage: [implement]
 ---
 
 Identify opportunities to add moments of joy, personality, and unexpected polish that transform functional interfaces into delightful experiences.

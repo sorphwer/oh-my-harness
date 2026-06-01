@@ -1,6 +1,7 @@
 ---
 name: threat-model
 description: Use when defining, refreshing, or reviewing a project's security model, trust boundaries, sensitive assets, actors, entrypoints, and abuse cases.
+stage: [spec]
 ---
 
 # Threat Model

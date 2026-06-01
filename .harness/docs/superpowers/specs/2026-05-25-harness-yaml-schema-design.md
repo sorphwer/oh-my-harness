@@ -1,15 +1,31 @@
 # harness.yaml Schema & Resource Model — Design
 
 Date: 2026-05-25
-Status: draft, pending user review
-Supersedes: the "Yaml Schema (v0)" section of `2026-05-25-mvp-development-design.md` (the rest of that spec — pipeline, test strategy, dependencies, acceptance criterion — still stands)
+Status: deprecated
+
+> **DEPRECATED — historical only.** This schema spec records an intermediate
+> transition away from `catalog/`, `agents-pool/`, `hooks-pool`, and
+> `skills-pool/`. Current work uses the accepted compiler v1 design:
+> [`2026-05-27-yaml-to-harness-compiler-v1-design.md`](2026-05-27-yaml-to-harness-compiler-v1-design.md).
+> In current v1 docs, plugins are first-class and the minimal prototype already
+> exists in `src/compile.ts`.
+
+> Historical note: this spec was later extended by the
+> [`plugin-stage matrix spec`](2026-05-26-plugin-stage-matrix-design.md)
+> (2026-05-26). That matrix remains useful as future IR direction, but this
+> yaml schema is not the active compiler contract.
+
+Historical note: this file originally superseded the "Yaml Schema (v0)" section
+of `2026-05-25-mvp-development-design.md`. It is now superseded by the
+2026-05-27 compiler v1 design and should not be used as the active yaml
+contract.
 
 ## Goal
 
 Define the long-lived shape of `harness.yaml` so that:
 
 - yaml only carries what's project-specific. Defaults that ship with harness-kit do not appear as `values`.
-- Reusable capabilities are organized as **plugins** — self-contained bundles that ship skills, agents, hooks, docs, and a permissions block as needed. The plugin is also the unit the (post-v0) LLM frontend picks from.
+- Reusable capabilities are organized as **plugins** — self-contained bundles that ship skills, agents, hooks, workflows, MCP resources, docs, and a permissions block as needed. The plugin is also the unit the (post-v0) LLM frontend picks from.
 - A typical project's yaml fits in roughly 20–30 lines and reads top-to-bottom as "who this project is + what stack it's on + what extras it needs beyond the defaults."
 
 ## North Star
@@ -18,7 +34,7 @@ Define the long-lived shape of `harness.yaml` so that:
 
 Consequences:
 
-1. There is no `docs: [...]` list in yaml. Which docs render is determined by which plugins are enabled (a plugin can ship `docs/<name>/{manifest.ts, template.md}`).
+1. There is no `docs: [...]` list in yaml. Which harness docs render is determined by which plugins are enabled (a plugin can ship `docs/<name>/{manifest.ts, template.md}`).
 2. There is no `additional-skills` / `additional-docs` at the top level. Anything beyond the preset goes under a single `extras:` namespace.
 3. There is no separate `catalog/` or `agents-pool/` or `hooks-pool/`. All such resources live inside `plugins/<plugin>/`.
 
@@ -26,8 +42,8 @@ Consequences:
 
 Two kinds of compile-time inputs:
 
-1. **Plugins** — self-contained bundles. Each plugin can contribute any combination of skills, agents, hooks, docs, and a permissions block. The plugin is the unit the yaml lists (via `preset` or `extras.plugins`) and the unit the LLM frontend picks from (via `plugins/*/README.md`).
-2. **References** — free-form per-project files (LLM-readable). Either pool ids from `references-pool/` or filesystem paths supplied by the user in `harness.yaml`.
+1. **Plugins** — self-contained bundles. Each plugin can contribute any combination of skills, agents, hooks, workflows, MCP resources, docs, and a permissions block. The plugin is the unit the yaml lists (via `preset` or `extras.plugins`) and the unit the LLM frontend picks from (via `plugins/*/README.md`).
+2. **References** — free-form per-project files (LLM-readable). Either pool ids from `references-pool/` when that pool exists, or filesystem paths supplied by the user in `harness.yaml`.
 
 ### Plugin directory layout
 
@@ -37,11 +53,18 @@ plugins/<plugin>/
   skills/<name>/SKILL.md                   # optional, 0..N  (frontmatter `name` + `description`; body is the skill instructions)
   agents/<name>.md                         # optional, 0..N
   hooks/<name>.json                        # optional, 0..N
+  workflows/<name>.md                      # optional, 0..N
+  mcp/<name>.json                          # optional, 0..N
   docs/<name>/{manifest.ts, template.md}   # optional, 0..N
   permissions.json                         # optional, 0..1
 ```
 
 Every subdirectory and every file is optional except `README.md`. The shape of a plugin is determined by which subdirs/files exist. Examples (on disk today):
+
+Only `docs/<name>/{manifest.ts, template.md}` pairs are compiler-rendered doc
+contributions. Other plugin-local documentation copied from upstream plugins
+(for example `plugins/browser/docs/capabilities/*`) is auxiliary reference
+material and is ignored by the compiler unless a future spec promotes it.
 
 - **Multi-skill plugin** (`plugins/planning/`): `README.md` + `skills/{brainstorming,spec-first-planning,test-driven-development}/SKILL.md`.
 - **Single-skill plugin** (`plugins/debugging/`): `README.md` + one `skills/systematic-debugging/SKILL.md`.
@@ -56,12 +79,17 @@ Every subdirectory and every file is optional except `README.md`. The shape of a
 | `skills/<name>/SKILL.md` | aggregated across all enabled plugins into `<outDir>/SKILLS.md` (frontmatter supplies name + description; body is the skill instructions) |
 | `agents/<name>.md` | copied to `<outDir>/.claude/agents/<name>.md` |
 | `hooks/<name>.json` | merged across all enabled plugins into `<outDir>/.claude/settings.example.json`'s `hooks` block |
+| `workflows/<name>.md` | copied to `<outDir>/workflows/<plugin>-<name>.md` |
+| `mcp/<name>.json` | merged across all enabled plugins into `<outDir>/mcp/config.json` |
 | `docs/<name>/{manifest.ts, template.md}` | eta-rendered with yaml params, written to `<outDir>/<manifest.outputPath>` |
 | `permissions.json` | merged across all enabled plugins into `<outDir>/.claude/settings.example.json`'s `permissions` block |
 
 ### References
 
-References are not part of any plugin. They live in `references-pool/` (shared content shipped with harness-kit) or are referenced by path in the yaml (project-local files, drag-and-drop in the future UI). All references emit to `<outDir>/docs/references/<basename>`.
+References are not part of any plugin. They live in `references-pool/` once
+shared reference fixtures exist, or are referenced by path in the yaml
+(project-local files, drag-and-drop in the future UI). All references emit to
+`<outDir>/docs/references/<basename>`.
 
 ## Plugin README
 
@@ -69,7 +97,7 @@ References are not part of any plugin. They live in `references-pool/` (shared c
 
 - the (post-v0) LLM frontend, which enumerates `plugins/*/README.md` to build a selection table;
 - humans who run `ls plugins/` and want to know what's there;
-- (post-v0) a generated `plugins/INDEX.md` if we want a single browsable catalog.
+- `plugins/INDEX.md`, the current compact inventory and stage coverage summary.
 
 The README is plain markdown — no required frontmatter in v0. A recommended structure (not enforced):
 
@@ -81,6 +109,8 @@ The README is plain markdown — no required frontmatter in v0. A recommended st
 - Skills: <comma-separated list, or "none">
 - Agents: <list, or "none">
 - Hooks: <list, or "none">
+- Workflows: <list, or "none">
+- MCP: <list, or "none">
 - Docs: <list of output paths, or "none">
 - Permissions: <"yes" or "no">
 
@@ -89,7 +119,7 @@ The README is plain markdown — no required frontmatter in v0. A recommended st
 <a paragraph or two: what kind of project this is for, what assumptions it makes>
 ```
 
-The compiler does not read `README.md` and does not enforce its shape. v0 ships the four READMEs listed under "Repo Layout" below; we'll formalize the format only if/when the LLM frontend needs more structure.
+The compiler does not read `README.md` and does not enforce its shape. Current plugin inventory is summarized in `plugins/INDEX.md`; we'll formalize the README format only if/when the LLM frontend needs more structure.
 
 ## Preset
 
@@ -155,11 +185,13 @@ extras:                       # optional: anything beyond what the preset alread
   skills:  [other-plugin:special-skill]   # individual skills, addressed as <plugin>:<name>
   agents:  [my-plugin:domain-reviewer]    # individual agents
   hooks:   [my-plugin:prevent-secrets-commit]  # individual hooks
+  workflows: [my-plugin:release]           # individual workflows
+  mcp: [my-plugin:browser]                 # individual MCP configs
 ```
 
 When no extras are needed, the entire `extras:` block is omitted.
 
-Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/skills/<name>/SKILL.md`, `plugins/<plugin>/agents/<name>.md`, or `plugins/<plugin>/hooks/<name>.json` respectively. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
+Individual extras items (`extras.skills`, `extras.agents`, `extras.hooks`, `extras.workflows`, `extras.mcp`) reference resources inside a plugin via `<plugin>:<name>`. The compiler looks them up in `plugins/<plugin>/skills/<name>/SKILL.md`, `plugins/<plugin>/agents/<name>.md`, `plugins/<plugin>/hooks/<name>.json`, `plugins/<plugin>/workflows/<name>.md`, or `plugins/<plugin>/mcp/<name>.json` respectively. The plugin does NOT need to be enabled separately — naming the resource is enough to enable it.
 
 ## Zod Schema (v1)
 
@@ -172,6 +204,8 @@ const Extras = z.object({
   skills:  z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
   agents:  z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
   hooks:   z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
+  workflows: z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
+  mcp:       z.array(z.string()).default([]),  // each entry is "<plugin>:<name>"
 }).partial();
 
 export const HarnessYaml = z.object({
@@ -213,9 +247,9 @@ load   ─► parse + zod-validate yaml
         │
 resolve ─► expand preset → plugin id list
         │  merge extras.plugins into the plugin set
-        │  for each enabled plugin, walk plugins/<id>/{skills,agents,hooks,docs,permissions.json}
+        │  for each enabled plugin, walk plugins/<id>/{skills,agents,hooks,workflows,mcp,renderable docs,permissions.json}
         │    and add every present resource to the appropriate bucket
-        │  for each extras.{skills,agents,hooks} entry, parse "<plugin>:<name>",
+        │  for each extras.{skills,agents,hooks,workflows,mcp} entry, parse "<plugin>:<name>",
         │    load the single file, and add it to its bucket
         │  resolve each reference (pool id or path)
         │  fail loud on unknown plugin id, unknown <plugin>:<name>, unknown reference
@@ -223,10 +257,12 @@ resolve ─► expand preset → plugin id list
 render  ─► eta-render each doc with stack/contract/derived params
         │  aggregate skills (across all enabled plugins + extras.skills) → SKILLS.md
         │  copy each agent file verbatim
+        │  copy workflow files with plugin-prefixed names
         │  compose .claude/settings.example.json from:
         │    enabled plugin id list +
         │    merged permissions blocks (one per plugin that ships permissions.json) +
         │    merged hooks blocks
+        │  merge MCP configs into mcp/config.json
         │  pass-through references as raw bytes
         │
 emit    ─► write file map to outDir; never delete unrelated files
@@ -243,6 +279,8 @@ Output map:
 | `plugins/<plugin>/docs/<name>/template.md` (rendered) | `<outDir>/<manifest.outputPath>` |
 | aggregated `plugins/<plugin>/skills/*/SKILL.md` | `<outDir>/SKILLS.md` |
 | `plugins/<plugin>/agents/<name>.md` | `<outDir>/.claude/agents/<name>.md` |
+| `plugins/<plugin>/workflows/<name>.md` | `<outDir>/workflows/<plugin>-<name>.md` |
+| merged plugin MCP configs | `<outDir>/mcp/config.json` |
 | merged plugin permissions + plugin id list + merged hooks | `<outDir>/.claude/settings.example.json` |
 | `references-pool/<id>.<ext>` or user path | `<outDir>/docs/references/<basename>` |
 
@@ -250,6 +288,7 @@ Output map:
 
 ```
 plugins/
+  INDEX.md                  # compact current inventory and stage coverage summary
   planning/                 # multi-skill — intent capture, specs, plans, TDD
     README.md
     skills/
@@ -286,6 +325,7 @@ plugins/
       threat-model/SKILL.md
       security-scan/SKILL.md
       fix-security-finding/SKILL.md
+  ...                       # copied Codex plugin bundles and standalone-skill containers; see INDEX.md
   nextjs/                   # PLANNED stack plugin (created during v1 implementation)
     README.md
     docs/
@@ -299,7 +339,7 @@ presets/                    # post-v0; for v0 hardcoded in src/compile.ts
   nextjs.ts
 
 references-pool/
-  auth-js-llms.txt
+  auth-js-llms.txt          # planned; created when reference fixtures land
 
 harness-kit-example/
   nextjs-acme/
@@ -307,7 +347,13 @@ harness-kit-example/
     .harness/               # compiled output (round-trip test target)
 ```
 
-For v0, only `plugins/` and `references-pool/` need to physically exist as content directories; `presets/` stays hardcoded in `src/compile.ts` until a second preset appears. The six skill-plugins (`planning`…`security-review`) and `references-pool/` exist today; the `nextjs` stack plugin is built during v1 implementation.
+For v0, `plugins/` is the active content directory and `plugins/INDEX.md`
+summarizes the current copied inventory. `references-pool/` is created when
+reference fixtures land; `presets/` stays hardcoded in `src/compile.ts` until a
+second preset appears. The current plugin inventory includes the bootstrap
+skills-only plugins plus copied Codex plugin bundles and standalone-skill
+container plugins; the `nextjs` stack plugin is still planned for v1
+implementation.
 
 ## Migration From the Pre-Redesign Layout
 
@@ -335,7 +381,7 @@ yaml shape itself is unchanged from the previous draft (still `preset` + `name/d
 2. `.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v0.md` — already marked SUPERSEDED.
 3. `.harness/docs/superpowers/plans/2026-05-25-harness-kit-mvp-v1.md` — rewrite against the plugin-centric layout (replace catalog/ and agents-pool/hooks-pool tasks with plugin-creation tasks; adjust all paths in resolve()/render() code).
 4. `.harness/ARCHITECTURE.md` — collapse separate entity definitions (Skill / Agent / Hook / Docs / Permissions / Plugin) into a single Plugin entity that ships sub-resources; reflect the new pool list in the high-level diagram.
-5. `.harness/AGENTS.md` — replace the planned content-pools list with `plugins/`, `presets/`, `references-pool/`.
+5. `.harness/AGENTS.md` — replace the planned content-pools list with `plugins/`, `presets/`, and a planned `references-pool/` note.
 6. `harness-kit-example/nextjs-acme/harness.yaml` — no change needed (yaml shape unchanged).
 7. `CLAUDE.md`, root `AGENTS.md` — no change needed (entry-point files; nothing references pool structure).
 

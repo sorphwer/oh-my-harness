@@ -1,6 +1,7 @@
 ---
 name: use-zendesk-cli
 description: Operate the Zendesk CLI to browse tickets, manage assignments and statuses, search Help Center articles, render ticket images, and download attachments. Use when the user asks to check Zendesk tickets, look up help center docs, download attachments, assign tickets, change ticket status, render ticket snapshots, or configure CLI settings via the command line.
+stage: [explore, deliver]
 ---
 
 # Use Zendesk CLI
