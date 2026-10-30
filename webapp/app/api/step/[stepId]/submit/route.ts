@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { getStep, type StepId } from "@/lib/steps";
+import { getStep, VALID_STEP_IDS, type StepId } from "@/lib/steps";
 import { saveStepOutput, setResumeToken } from "@/lib/session-store";
 
 export const runtime = "nodejs";
@@ -16,21 +16,6 @@ const bodySchema = z.object({
   }),
 });
 
-const validStepIds: ReadonlySet<string> = new Set([
-  "product-sense",
-  "agents",
-  "architecture",
-  "design",
-  "frontend",
-  "operations",
-  "plans",
-  "quality-score",
-  "reliability",
-  "security",
-  "uat-checklist",
-  "plugin-selection",
-]);
-
 const REPO_ROOT = join(process.cwd(), "..");
 
 export async function POST(
@@ -38,7 +23,7 @@ export async function POST(
   ctx: { params: Promise<{ stepId: string }> },
 ) {
   const { stepId } = await ctx.params;
-  if (!validStepIds.has(stepId)) {
+  if (!VALID_STEP_IDS.has(stepId)) {
     return NextResponse.json({ error: "unknown step" }, { status: 400 });
   }
   const body = await req.json();

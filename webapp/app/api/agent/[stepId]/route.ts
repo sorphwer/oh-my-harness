@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { runAgent } from "@/lib/agent-sdk";
-import type { StepId } from "@/lib/steps";
+import { VALID_STEP_IDS, type StepId } from "@/lib/steps";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,27 +10,12 @@ const bodySchema = z.object({
   userMessage: z.string().optional(),
 });
 
-const validStepIds: ReadonlySet<string> = new Set([
-  "product-sense",
-  "agents",
-  "architecture",
-  "design",
-  "frontend",
-  "operations",
-  "plans",
-  "quality-score",
-  "reliability",
-  "security",
-  "uat-checklist",
-  "plugin-selection",
-]);
-
 export async function POST(
   req: Request,
   ctx: { params: Promise<{ stepId: string }> },
 ) {
   const { stepId } = await ctx.params;
-  if (!validStepIds.has(stepId)) {
+  if (!VALID_STEP_IDS.has(stepId)) {
     return new Response(`Unknown step: ${stepId}`, { status: 400 });
   }
   const body = await req.json();

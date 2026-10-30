@@ -1,12 +1,10 @@
 export type StepId =
   | "brief"
   | "product-sense"
-  | "agents"
   | "architecture"
   | "design"
   | "frontend"
   | "operations"
-  | "plans"
   | "quality-score"
   | "reliability"
   | "security"
@@ -41,15 +39,6 @@ export const STEP_GRAPH: ReadonlyArray<StepNode> = [
     dependsOn: ["brief"],
     specPath: "specs/01-product-sense.md",
     outputRelPath: "docs/PRODUCT_SENSE.md",
-    mvpEnabled: true,
-  },
-  {
-    id: "agents",
-    title: "Agents Guide",
-    layer: 1,
-    dependsOn: ["brief"],
-    specPath: "specs/02-agents.md",
-    outputRelPath: "AGENTS.md",
     mvpEnabled: true,
   },
   {
@@ -116,15 +105,6 @@ export const STEP_GRAPH: ReadonlyArray<StepNode> = [
     mvpEnabled: true,
   },
   {
-    id: "plans",
-    title: "Plans",
-    layer: 5,
-    dependsOn: ["product-sense", "architecture", "design", "quality-score"],
-    specPath: "specs/10-plans.md",
-    outputRelPath: "docs/PLANS.md",
-    mvpEnabled: true,
-  },
-  {
     id: "uat-checklist",
     title: "UAT Checklist",
     layer: 5,
@@ -137,7 +117,7 @@ export const STEP_GRAPH: ReadonlyArray<StepNode> = [
     id: "plugin-selection",
     title: "Plugin selection",
     layer: 6,
-    dependsOn: ["plans", "uat-checklist"],
+    dependsOn: ["uat-checklist", "frontend"],
     specPath: "specs/12-plugin-selection.md",
     mvpEnabled: true,
   },
@@ -145,6 +125,10 @@ export const STEP_GRAPH: ReadonlyArray<StepNode> = [
 
 const STEP_BY_ID: ReadonlyMap<StepId, StepNode> = new Map(
   STEP_GRAPH.map((node) => [node.id, node]),
+);
+
+export const VALID_STEP_IDS: ReadonlySet<string> = new Set(
+  STEP_GRAPH.filter((node) => node.id !== "brief").map((node) => node.id),
 );
 
 export function getStep(id: StepId): StepNode {

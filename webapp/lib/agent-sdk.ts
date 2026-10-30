@@ -110,16 +110,28 @@ function buildUserTurn(opts: {
 
   const brief = loadBrief(opts.sessionId);
   const priorDocs = buildPriorDocuments(opts.stepId, opts.sessionId);
+  const priorSelf = loadStepOutput(opts.sessionId, opts.stepId);
 
   const lines: string[] = [
-    "Below is the shared project brief.",
-    "Start the interview now by emitting your first JSON UITree.",
+    priorSelf
+      ? "The user is REVISING a document you previously produced. See `prior_self_output` below — it is the current saved version. Acknowledge it briefly, ask the user what they want to change, then emit a final Submit with the updated full markdown."
+      : "Below is the shared project brief. Start the interview now by emitting your first JSON UITree.",
     "",
     "## project_brief",
     "```json",
     JSON.stringify(brief, null, 2),
     "```",
   ];
+
+  if (priorSelf) {
+    lines.push(
+      "",
+      "## prior_self_output",
+      "```markdown",
+      priorSelf,
+      "```",
+    );
+  }
 
   if (Object.keys(priorDocs).length > 0) {
     lines.push(
